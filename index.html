@@ -280,18 +280,18 @@
             const osc = ctx.createOscillator();
             const gainNode = ctx.createGain();
 
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(100, time);
-            osc.frequency.exponentialRampToValueAtTime(50, time + 0.1);
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(1000, time);
+            osc.frequency.exponentialRampToValueAtTime(800, time + 0.08);
 
-            gainNode.gain.setValueAtTime(1, time);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
+            gainNode.gain.setValueAtTime(1.2, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
 
             osc.connect(gainNode);
             gainNode.connect(beatGain);
 
             osc.start(time);
-            osc.stop(time + 0.15);
+            osc.stop(time + 0.12);
         }
 
         function playBol(time) {
@@ -299,17 +299,18 @@
             const osc = ctx.createOscillator();
             const gainNode = ctx.createGain();
 
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(880, time);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(150, time);
+            osc.frequency.exponentialRampToValueAtTime(80, time + 0.15);
 
-            gainNode.gain.setValueAtTime(0.8, time);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+            gainNode.gain.setValueAtTime(1, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
 
             osc.connect(gainNode);
             gainNode.connect(bolGain);
 
             osc.start(time);
-            osc.stop(time + 0.1);
+            osc.stop(time + 0.2);
         }
 
         function playSubdivision(time) {
@@ -317,17 +318,17 @@
             const osc = ctx.createOscillator();
             const gainNode = ctx.createGain();
 
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(200, time);
+            osc.type = 'sine';
+            osc.frequency.value = 1800;
 
             gainNode.gain.setValueAtTime(0.5, time);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.015);
 
             osc.connect(gainNode);
             gainNode.connect(subdivGain);
 
             osc.start(time);
-            osc.stop(time + 0.01);
+            osc.stop(time + 0.015);
         }
 
         // Update volumes
