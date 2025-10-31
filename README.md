@@ -8,8 +8,8 @@ A web-based tabla polyrhythm training application with synchronized audio and vi
 - **Three-Layer Audio System**:
   - Beat: Low-frequency thump sound on every main beat
   - Bol: Mid-frequency bell-like pluck on every bol
-  - Subdivision: Quiet tick on every grid block
-- **Individual Volume Controls**: Mix beat, bol, and subdivision sounds independently
+  - Laghu: Quiet tick on every grid block
+- **Individual Volume Controls**: Mix beat, bol, and laghu sounds independently
 - **Dynamic Visual Grid**:
   - Blue borders mark the start of each beat
   - Alternating background colors group bols
@@ -49,7 +49,7 @@ A web-based tabla polyrhythm training application with synchronized audio and vi
    - **Tempo**: Speed in beats per minute (BPM)
 
 2. **Adjust Volume Mix**:
-   - Use the three sliders to balance Beat, Bol, and Subdivision sounds
+   - Use the three sliders to balance Beat, Bol, and Laghu sounds
    - This helps focus on different aspects of the rhythm
 
 3. **Play**:

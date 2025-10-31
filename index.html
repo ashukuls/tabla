@@ -23,7 +23,6 @@
 <body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
     <div class="max-w-7xl mx-auto">
         <h1 class="text-3xl md:text-4xl font-bold mb-2 text-center">Layakari Polyrhythm Trainer</h1>
-        <p class="text-gray-400 text-center mb-2">Master tabla polyrhythms with synchronized audio and visual feedback</p>
         <p id="audioHint" class="text-yellow-400 text-sm text-center mb-6">Tap anywhere to enable audio</p>
 
         <!-- Controls Section -->
@@ -62,14 +61,14 @@
                     <div>
                         <label class="block text-sm mb-1 flex justify-between">
                             <span>Bol</span>
-                            <span id="bolVolLabel" class="text-gray-400">70%</span>
+                            <span id="bolVolLabel" class="text-gray-400">0%</span>
                         </label>
-                        <input type="range" id="bolVol" min="0" max="100" value="70"
+                        <input type="range" id="bolVol" min="0" max="100" value="0"
                                class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-teal-500">
                     </div>
                     <div>
                         <label class="block text-sm mb-1 flex justify-between">
-                            <span>Subdivision</span>
+                            <span>Laghu</span>
                             <span id="subdivVolLabel" class="text-gray-400">20%</span>
                         </label>
                         <input type="range" id="subdivVol" min="0" max="100" value="20"
@@ -90,9 +89,12 @@
         <!-- Visualizer Section -->
         <div class="bg-gray-800 rounded-lg p-6">
             <h2 class="text-xl font-semibold mb-4">Rhythm Visualizer</h2>
-            <div class="overflow-x-auto">
-                <div id="grid" class="inline-flex gap-0"></div>
+            <!-- Desktop: horizontal scrolling -->
+            <div class="hidden md:block overflow-x-auto">
+                <div id="gridDesktop" class="inline-flex gap-0"></div>
             </div>
+            <!-- Mobile: multiple rows -->
+            <div id="gridMobile" class="md:hidden space-y-2"></div>
             <div class="mt-4 flex flex-wrap gap-4 text-sm">
                 <div class="flex items-center gap-2">
                     <div class="w-4 h-4 bg-teal-500 rounded-full"></div>
@@ -109,6 +111,29 @@
                 <div class="flex items-center gap-2">
                     <div class="w-4 h-4 bg-yellow-500"></div>
                     <span>Current Position</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice Instructions -->
+        <div class="bg-gray-800 rounded-lg p-6 mt-6">
+            <h2 class="text-xl font-semibold mb-4">How to Practice</h2>
+            <div class="space-y-4 text-gray-300">
+                <div class="flex gap-3">
+                    <span class="text-blue-400 font-bold flex-shrink-0">Step 1:</span>
+                    <p>Keep Bol volume at 0. Practice clapping <span class="font-semibold text-white">Tali</span> (hand clap) on each beat. Focus on keeping steady time with the beat sound.</p>
+                </div>
+                <div class="flex gap-3">
+                    <span class="text-blue-400 font-bold flex-shrink-0">Step 2:</span>
+                    <p>Continue with Bol volume at 0. Now practice saying the numbers (1, 2, 3, 4...) in rhythm while clapping on the beats. Match your voice to the laghu (subdivisions).</p>
+                </div>
+                <div class="flex gap-3">
+                    <span class="text-blue-400 font-bold flex-shrink-0">Step 3:</span>
+                    <p>Increase the Bol volume. Now say only the <span class="font-semibold text-white">first number</span> of each bol group along with the bell sound. Continue clapping on beats. This is the layakari pattern!</p>
+                </div>
+                <div class="flex gap-3">
+                    <span class="text-blue-400 font-bold flex-shrink-0">Step 4:</span>
+                    <p>Replace the numbers with actual tabla bols (e.g., <span class="font-semibold text-white">Ti R Ki T</span> or <span class="font-semibold text-white">Dha Ge Na Ti</span>). Recite the full bol sequence in rhythm while maintaining the layakari pattern. This is how you practice real tabla compositions!</p>
                 </div>
             </div>
         </div>
@@ -139,7 +164,8 @@
         const beatsInput = document.getElementById('beats');
         const tempoInput = document.getElementById('tempo');
         const playBtn = document.getElementById('playBtn');
-        const gridContainer = document.getElementById('grid');
+        const gridDesktop = document.getElementById('gridDesktop');
+        const gridMobile = document.getElementById('gridMobile');
         const beatVolSlider = document.getElementById('beatVol');
         const bolVolSlider = document.getElementById('bolVol');
         const subdivVolSlider = document.getElementById('subdivVol');
@@ -287,10 +313,65 @@
             return { N, D, totalBlocks, bolInterval, beatInterval };
         }
 
+        // Helper function to create a cell
+        function createCell(i, boxNumbers, bolInterval, beatInterval) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell relative';
+            cell.style.width = '60px';
+            cell.style.height = '60px';
+            cell.dataset.index = i;
+
+            // Determine bol number for this block
+            const bolNum = Math.floor(i / bolInterval);
+            const isBolStart = i % bolInterval === 0;
+            const isBeatStart = i % beatInterval === 0;
+
+            // Alternating bol background
+            const bgColor = bolNum % 2 === 0 ? 'bg-gray-700' : 'bg-gray-600';
+            cell.classList.add(bgColor);
+
+            // Beat grouping border
+            if (isBeatStart) {
+                cell.style.borderLeft = '4px solid rgb(59, 130, 246)';
+            } else {
+                cell.style.borderLeft = '1px solid rgb(75, 85, 99)';
+            }
+            cell.style.borderTop = '1px solid rgb(75, 85, 99)';
+            cell.style.borderBottom = '1px solid rgb(75, 85, 99)';
+            cell.style.borderRight = '1px solid rgb(75, 85, 99)';
+
+            // Event indicator dots
+            const dotContainer = document.createElement('div');
+            dotContainer.className = 'absolute top-1 left-1/2 transform -translate-x-1/2 flex gap-1';
+
+            if (isBolStart && isBeatStart) {
+                // Purple dot for coincidence
+                const dot = document.createElement('div');
+                dot.className = 'w-3 h-3 bg-purple-500 rounded-full';
+                dotContainer.appendChild(dot);
+            } else if (isBolStart) {
+                // Teal dot for bol
+                const dot = document.createElement('div');
+                dot.className = 'w-3 h-3 bg-teal-500 rounded-full';
+                dotContainer.appendChild(dot);
+            }
+
+            cell.appendChild(dotContainer);
+
+            // Box number
+            const number = document.createElement('div');
+            number.className = 'absolute bottom-1 left-1/2 transform -translate-x-1/2 text-sm font-semibold text-gray-300';
+            number.textContent = boxNumbers[i] || i + 1;
+            cell.appendChild(number);
+
+            return cell;
+        }
+
         // Generate visual grid
         function generateGrid() {
             const { N, D, totalBlocks, bolInterval, beatInterval } = calculatePattern();
-            gridContainer.innerHTML = '';
+            gridDesktop.innerHTML = '';
+            gridMobile.innerHTML = '';
 
             // Calculate box numbers based on the requirement
             const boxNumbers = [];
@@ -304,58 +385,38 @@
                 }
             }
 
-            // Alternate background colors per bol
+            // Generate DESKTOP grid (single row)
             for (let i = 0; i < totalBlocks; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'grid-cell relative';
-                cell.style.width = '60px';
-                cell.style.height = '60px';
-                cell.dataset.index = i;
+                const cell = createCell(i, boxNumbers, bolInterval, beatInterval);
+                gridDesktop.appendChild(cell);
+            }
 
-                // Determine bol number for this block
-                const bolNum = Math.floor(i / bolInterval);
-                const isBolStart = i % bolInterval === 0;
-                const isBeatStart = i % beatInterval === 0;
+            // Generate MOBILE grid (multiple rows, one per beat)
+            const blocksPerBeat = beatInterval;
+            for (let beatNum = 0; beatNum < D; beatNum++) {
+                const row = document.createElement('div');
+                row.className = 'flex flex-col gap-2';
 
-                // Alternating bol background
-                const bgColor = bolNum % 2 === 0 ? 'bg-gray-700' : 'bg-gray-600';
-                cell.classList.add(bgColor);
+                // Add beat label
+                const beatLabel = document.createElement('div');
+                beatLabel.className = 'text-center text-xs text-gray-400';
+                beatLabel.textContent = `Beat ${beatNum + 1}`;
+                row.appendChild(beatLabel);
 
-                // Beat grouping border
-                if (isBeatStart) {
-                    cell.style.borderLeft = '4px solid rgb(59, 130, 246)';
-                } else {
-                    cell.style.borderLeft = '1px solid rgb(75, 85, 99)';
-                }
-                cell.style.borderTop = '1px solid rgb(75, 85, 99)';
-                cell.style.borderBottom = '1px solid rgb(75, 85, 99)';
-                cell.style.borderRight = '1px solid rgb(75, 85, 99)';
+                const cellsContainer = document.createElement('div');
+                cellsContainer.className = 'flex gap-0 justify-center';
 
-                // Event indicator dots
-                const dotContainer = document.createElement('div');
-                dotContainer.className = 'absolute top-1 left-1/2 transform -translate-x-1/2 flex gap-1';
+                // Add blocks for this beat
+                const startBlock = beatNum * blocksPerBeat;
+                const endBlock = Math.min(startBlock + blocksPerBeat, totalBlocks);
 
-                if (isBolStart && isBeatStart) {
-                    // Purple dot for coincidence
-                    const dot = document.createElement('div');
-                    dot.className = 'w-3 h-3 bg-purple-500 rounded-full';
-                    dotContainer.appendChild(dot);
-                } else if (isBolStart) {
-                    // Teal dot for bol
-                    const dot = document.createElement('div');
-                    dot.className = 'w-3 h-3 bg-teal-500 rounded-full';
-                    dotContainer.appendChild(dot);
+                for (let i = startBlock; i < endBlock; i++) {
+                    const cell = createCell(i, boxNumbers, bolInterval, beatInterval);
+                    cellsContainer.appendChild(cell);
                 }
 
-                cell.appendChild(dotContainer);
-
-                // Box number
-                const number = document.createElement('div');
-                number.className = 'absolute bottom-1 left-1/2 transform -translate-x-1/2 text-sm font-semibold text-gray-300';
-                number.textContent = boxNumbers[i] || i + 1;
-                cell.appendChild(number);
-
-                gridContainer.appendChild(cell);
+                row.appendChild(cellsContainer);
+                gridMobile.appendChild(row);
             }
         }
 
@@ -402,10 +463,11 @@
             const elapsedTime = currentTime - startTime;
             const visualBlock = Math.floor(elapsedTime / blockDuration) % totalBlocks;
 
-            // Update visual
-            const cells = gridContainer.querySelectorAll('.grid-cell');
-            cells.forEach((cell, i) => {
-                if (i === visualBlock) {
+            // Update visual in both desktop and mobile grids
+            const allCells = document.querySelectorAll('.grid-cell');
+            allCells.forEach((cell) => {
+                const cellIndex = parseInt(cell.dataset.index);
+                if (cellIndex === visualBlock) {
                     cell.classList.add('active');
                 } else {
                     cell.classList.remove('active');
@@ -462,9 +524,9 @@
                 animationId = null;
             }
 
-            // Clear visual highlight
-            const cells = gridContainer.querySelectorAll('.grid-cell');
-            cells.forEach(cell => cell.classList.remove('active'));
+            // Clear visual highlight in both grids
+            const allCells = document.querySelectorAll('.grid-cell');
+            allCells.forEach(cell => cell.classList.remove('active'));
 
             // Update button to show Play
             playBtn.innerHTML = '▶ Play';
