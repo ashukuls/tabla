@@ -194,30 +194,53 @@
 
         // Unlock audio on mobile (iOS Safari workaround)
         function unlockAudio() {
-            if (audioUnlocked) return;
+            // Hide the hint immediately on first interaction
+            const hint = document.getElementById('audioHint');
+            if (hint) hint.style.display = 'none';
+
+            if (audioUnlocked) return Promise.resolve();
 
             const ctx = initAudio();
 
-            // Create and play a silent buffer
-            const buffer = ctx.createBuffer(1, 1, 22050);
-            const source = ctx.createBufferSource();
-            source.buffer = buffer;
-            source.connect(ctx.destination);
-            source.start(0);
+            return new Promise((resolve, reject) => {
+                try {
+                    // Create and play a silent buffer
+                    const buffer = ctx.createBuffer(1, 1, 22050);
+                    const source = ctx.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(ctx.destination);
+                    source.start(0);
 
-            // Resume context
-            ctx.resume().then(() => {
-                audioUnlocked = true;
-                console.log('Audio unlocked');
-
-                // Hide the audio hint
-                const hint = document.getElementById('audioHint');
-                if (hint) hint.style.display = 'none';
+                    // Resume context
+                    ctx.resume().then(() => {
+                        audioUnlocked = true;
+                        console.log('Audio unlocked successfully, state:', ctx.state);
+                        resolve();
+                    }).catch((err) => {
+                        console.error('Failed to resume audio context:', err);
+                        reject(err);
+                    });
+                } catch (err) {
+                    console.error('Failed to unlock audio:', err);
+                    reject(err);
+                }
             });
         }
 
-        // Add touch/click listener for audio unlock
-        document.body.addEventListener('pointerdown', unlockAudio, { once: true });
+        // Add multiple listeners for audio unlock (iOS can be finicky)
+        const unlockEvents = ['touchstart', 'touchend', 'click', 'pointerdown'];
+        let unlockAttempted = false;
+
+        unlockEvents.forEach(eventType => {
+            document.body.addEventListener(eventType, () => {
+                if (!unlockAttempted) {
+                    unlockAttempted = true;
+                    unlockAudio().catch(err => {
+                        console.error('Audio unlock error:', err);
+                    });
+                }
+            }, { once: true });
+        });
 
         // Sound Generation Functions
         function playBeat(time) {
@@ -478,14 +501,23 @@
         }
 
         // Play function
-        function play() {
+        async function play() {
             if (isPlaying) return;
 
-            unlockAudio();
+            // Unlock audio first (critical for iOS)
+            await unlockAudio();
             const ctx = initAudio();
 
+            // Aggressive resume for iOS
             if (ctx.state === 'suspended') {
-                ctx.resume();
+                await ctx.resume();
+            }
+
+            // Double-check audio is ready
+            if (ctx.state !== 'running') {
+                console.warn('Audio context not running:', ctx.state);
+                alert('Please tap the screen to enable audio, then press Play again.');
+                return;
             }
 
             // Calculate block duration before starting
@@ -535,11 +567,11 @@
         }
 
         // Toggle play/stop
-        function togglePlay() {
+        async function togglePlay() {
             if (isPlaying) {
                 stop();
             } else {
-                play();
+                await play();
             }
         }
 
