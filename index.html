@@ -36,17 +36,17 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-2">Bols (N)</label>
-                    <input type="number" id="bols" min="1" max="32" value="4"
+                    <input type="number" id="bols" min="1" max="10" value="4"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-2">Beats (D)</label>
-                    <input type="number" id="beats" min="1" max="32" value="3"
+                    <input type="number" id="beats" min="1" max="10" value="3"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-2">Tempo (BPM)</label>
-                    <input type="number" id="tempo" min="20" max="240" value="30"
+                    <input type="number" id="tempo" min="10" max="300" value="30"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                 </div>
             </div>
@@ -608,17 +608,43 @@
             }
         }
 
+        // Validation functions
+        function validateInput(input, min, max) {
+            let value = parseInt(input.value);
+            if (isNaN(value) || value < min) {
+                input.value = min;
+            } else if (value > max) {
+                input.value = max;
+            }
+        }
+
         // Event listeners
         playBtn.addEventListener('click', togglePlay);
 
-        // Regenerate grid when parameters change
+        // Validate and regenerate grid when parameters change
         bolsInput.addEventListener('change', () => {
+            validateInput(bolsInput, 1, 10);
             stop();
             generateGrid();
         });
+        bolsInput.addEventListener('blur', () => {
+            validateInput(bolsInput, 1, 10);
+        });
+
         beatsInput.addEventListener('change', () => {
+            validateInput(beatsInput, 1, 10);
             stop();
             generateGrid();
+        });
+        beatsInput.addEventListener('blur', () => {
+            validateInput(beatsInput, 1, 10);
+        });
+
+        tempoInput.addEventListener('change', () => {
+            validateInput(tempoInput, 10, 300);
+        });
+        tempoInput.addEventListener('blur', () => {
+            validateInput(tempoInput, 10, 300);
         });
 
         // Initialize
