@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layakari Polyrhythm Trainer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .grid-cell {
+            transition: background-color 0.05s ease;
+        }
+        .grid-cell.active {
+            background-color: rgb(234, 179, 8) !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl md:text-4xl font-bold mb-2 text-center">Layakari Polyrhythm Trainer</h1>
+        <p class="text-gray-400 text-center mb-2">Master tabla polyrhythms with synchronized audio and visual feedback</p>
+        <p id="audioHint" class="text-yellow-400 text-sm text-center mb-6">Tap anywhere to enable audio</p>
+
+        <!-- Controls Section -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6 space-y-6">
+            <!-- Rhythm Parameters -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Bols (N)</label>
+                    <input type="number" id="bols" min="1" max="32" value="4"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Beats (D)</label>
+                    <input type="number" id="beats" min="1" max="32" value="3"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Tempo (BPM)</label>
+                    <input type="number" id="tempo" min="20" max="240" value="30"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <!-- Volume Controls -->
+            <div class="space-y-3">
+                <h3 class="text-sm font-semibold text-gray-300 uppercase tracking-wide">Volume Mix</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm mb-1 flex justify-between">
+                            <span>Beat</span>
+                            <span id="beatVolLabel" class="text-gray-400">50%</span>
+                        </label>
+                        <input type="range" id="beatVol" min="0" max="100" value="50"
+                               class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1 flex justify-between">
+                            <span>Bol</span>
+                            <span id="bolVolLabel" class="text-gray-400">70%</span>
+                        </label>
+                        <input type="range" id="bolVol" min="0" max="100" value="70"
+                               class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1 flex justify-between">
+                            <span>Subdivision</span>
+                            <span id="subdivVolLabel" class="text-gray-400">20%</span>
+                        </label>
+                        <input type="range" id="subdivVol" min="0" max="100" value="20"
+                               class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-gray-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button id="playBtn"
+                        class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors">
+                    ▶ Play
+                </button>
+            </div>
+        </div>
+
+        <!-- Visualizer Section -->
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Rhythm Visualizer</h2>
+            <div class="overflow-x-auto">
+                <div id="grid" class="inline-flex gap-0"></div>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-teal-500 rounded-full"></div>
+                    <span>Bol</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-purple-500 rounded-full"></div>
+                    <span>Beat + Bol</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 border-4 border-blue-500"></div>
+                    <span>Beat Start</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-yellow-500"></div>
+                    <span>Current Position</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Audio Context and State
+        let audioContext = null;
+        let isPlaying = false;
+        let currentBlock = 0;
+        let totalBlocks = 0;
+        let animationId = null;
+        let nextNoteTime = 0;
+        let startTime = 0;
+        let scheduleAheadTime = 0.1;
+        let lookahead = 25.0;
+        let timerID = null;
+        let blockDuration = 0;
+        let bolBlocks = [];
+        let beatBlocks = [];
+        let audioUnlocked = false;
+
+        // Gain Nodes
+        let beatGain, bolGain, subdivGain;
+
+        // DOM Elements
+        const bolsInput = document.getElementById('bols');
+        const beatsInput = document.getElementById('beats');
+        const tempoInput = document.getElementById('tempo');
+        const playBtn = document.getElementById('playBtn');
+        const gridContainer = document.getElementById('grid');
+        const beatVolSlider = document.getElementById('beatVol');
+        const bolVolSlider = document.getElementById('bolVol');
+        const subdivVolSlider = document.getElementById('subdivVol');
+        const beatVolLabel = document.getElementById('beatVolLabel');
+        const bolVolLabel = document.getElementById('bolVolLabel');
+        const subdivVolLabel = document.getElementById('subdivVolLabel');
+
+        // Initialize Audio Context
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Create gain nodes
+                beatGain = audioContext.createGain();
+                bolGain = audioContext.createGain();
+                subdivGain = audioContext.createGain();
+
+                beatGain.connect(audioContext.destination);
+                bolGain.connect(audioContext.destination);
+                subdivGain.connect(audioContext.destination);
+
+                updateVolumes();
+            }
+            return audioContext;
+        }
+
+        // Unlock audio on mobile (iOS Safari workaround)
+        function unlockAudio() {
+            if (audioUnlocked) return;
+
+            const ctx = initAudio();
+
+            // Create and play a silent buffer
+            const buffer = ctx.createBuffer(1, 1, 22050);
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(ctx.destination);
+            source.start(0);
+
+            // Resume context
+            ctx.resume().then(() => {
+                audioUnlocked = true;
+                console.log('Audio unlocked');
+
+                // Hide the audio hint
+                const hint = document.getElementById('audioHint');
+                if (hint) hint.style.display = 'none';
+            });
+        }
+
+        // Add touch/click listener for audio unlock
+        document.body.addEventListener('pointerdown', unlockAudio, { once: true });
+
+        // Sound Generation Functions
+        function playBeat(time) {
+            const ctx = initAudio();
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(100, time);
+            osc.frequency.exponentialRampToValueAtTime(50, time + 0.1);
+
+            gainNode.gain.setValueAtTime(1, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
+
+            osc.connect(gainNode);
+            gainNode.connect(beatGain);
+
+            osc.start(time);
+            osc.stop(time + 0.15);
+        }
+
+        function playBol(time) {
+            const ctx = initAudio();
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(880, time);
+
+            gainNode.gain.setValueAtTime(0.8, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+
+            osc.connect(gainNode);
+            gainNode.connect(bolGain);
+
+            osc.start(time);
+            osc.stop(time + 0.1);
+        }
+
+        function playSubdivision(time) {
+            const ctx = initAudio();
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(200, time);
+
+            gainNode.gain.setValueAtTime(0.5, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.01);
+
+            osc.connect(gainNode);
+            gainNode.connect(subdivGain);
+
+            osc.start(time);
+            osc.stop(time + 0.01);
+        }
+
+        // Update volumes
+        function updateVolumes() {
+            if (!beatGain) return;
+
+            beatGain.gain.value = beatVolSlider.value / 100;
+            bolGain.gain.value = bolVolSlider.value / 100;
+            subdivGain.gain.value = subdivVolSlider.value / 100;
+
+            beatVolLabel.textContent = beatVolSlider.value + '%';
+            bolVolLabel.textContent = bolVolSlider.value + '%';
+            subdivVolLabel.textContent = subdivVolSlider.value + '%';
+        }
+
+        beatVolSlider.addEventListener('input', updateVolumes);
+        bolVolSlider.addEventListener('input', updateVolumes);
+        subdivVolSlider.addEventListener('input', updateVolumes);
+
+        // Calculate polyrhythm pattern
+        function calculatePattern() {
+            const N = parseInt(bolsInput.value);
+            const D = parseInt(beatsInput.value);
+
+            // Simply use N * D for total blocks (no LCM)
+            totalBlocks = N * D;
+            const bolInterval = totalBlocks / N;
+            const beatInterval = totalBlocks / D;
+
+            bolBlocks = [];
+            beatBlocks = [];
+
+            for (let i = 0; i < totalBlocks; i++) {
+                if (i % bolInterval === 0) bolBlocks.push(i);
+                if (i % beatInterval === 0) beatBlocks.push(i);
+            }
+
+            return { N, D, totalBlocks, bolInterval, beatInterval };
+        }
+
+        // Generate visual grid
+        function generateGrid() {
+            const { N, D, totalBlocks, bolInterval, beatInterval } = calculatePattern();
+            gridContainer.innerHTML = '';
+
+            // Calculate box numbers based on the requirement
+            const boxNumbers = [];
+            for (let bolNum = 1; bolNum <= N; bolNum++) {
+                const blocksInThisBol = Math.floor(totalBlocks / N);
+                const extraBlocks = bolNum <= (totalBlocks % N) ? 1 : 0;
+                const totalBlocksForBol = blocksInThisBol + extraBlocks;
+
+                for (let j = 0; j < totalBlocksForBol; j++) {
+                    boxNumbers.push(bolNum);
+                }
+            }
+
+            // Alternate background colors per bol
+            for (let i = 0; i < totalBlocks; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell relative';
+                cell.style.width = '60px';
+                cell.style.height = '60px';
+                cell.dataset.index = i;
+
+                // Determine bol number for this block
+                const bolNum = Math.floor(i / bolInterval);
+                const isBolStart = i % bolInterval === 0;
+                const isBeatStart = i % beatInterval === 0;
+
+                // Alternating bol background
+                const bgColor = bolNum % 2 === 0 ? 'bg-gray-700' : 'bg-gray-600';
+                cell.classList.add(bgColor);
+
+                // Beat grouping border
+                if (isBeatStart) {
+                    cell.style.borderLeft = '4px solid rgb(59, 130, 246)';
+                } else {
+                    cell.style.borderLeft = '1px solid rgb(75, 85, 99)';
+                }
+                cell.style.borderTop = '1px solid rgb(75, 85, 99)';
+                cell.style.borderBottom = '1px solid rgb(75, 85, 99)';
+                cell.style.borderRight = '1px solid rgb(75, 85, 99)';
+
+                // Event indicator dots
+                const dotContainer = document.createElement('div');
+                dotContainer.className = 'absolute top-1 left-1/2 transform -translate-x-1/2 flex gap-1';
+
+                if (isBolStart && isBeatStart) {
+                    // Purple dot for coincidence
+                    const dot = document.createElement('div');
+                    dot.className = 'w-3 h-3 bg-purple-500 rounded-full';
+                    dotContainer.appendChild(dot);
+                } else if (isBolStart) {
+                    // Teal dot for bol
+                    const dot = document.createElement('div');
+                    dot.className = 'w-3 h-3 bg-teal-500 rounded-full';
+                    dotContainer.appendChild(dot);
+                }
+
+                cell.appendChild(dotContainer);
+
+                // Box number
+                const number = document.createElement('div');
+                number.className = 'absolute bottom-1 left-1/2 transform -translate-x-1/2 text-sm font-semibold text-gray-300';
+                number.textContent = boxNumbers[i] || i + 1;
+                cell.appendChild(number);
+
+                gridContainer.appendChild(cell);
+            }
+        }
+
+        // Scheduler for precise timing
+        function scheduler() {
+            const ctx = audioContext;
+            while (nextNoteTime < ctx.currentTime + scheduleAheadTime) {
+                scheduleNote(currentBlock, nextNoteTime);
+                nextNote();
+            }
+            timerID = setTimeout(scheduler, lookahead);
+        }
+
+        function scheduleNote(blockIndex, time) {
+            // Always play subdivision
+            playSubdivision(time);
+
+            // Play beat if this is a beat block
+            if (beatBlocks.includes(blockIndex)) {
+                playBeat(time);
+            }
+
+            // Play bol if this is a bol block
+            if (bolBlocks.includes(blockIndex)) {
+                playBol(time);
+            }
+        }
+
+        function nextNote() {
+            const bpm = parseInt(tempoInput.value);
+            const secondsPerBeat = 60.0 / bpm;
+            blockDuration = secondsPerBeat / (totalBlocks / parseInt(beatsInput.value));
+
+            nextNoteTime += blockDuration;
+            currentBlock = (currentBlock + 1) % totalBlocks;
+        }
+
+        // Visual animation
+        function animate() {
+            if (!isPlaying) return;
+
+            const ctx = audioContext;
+            const currentTime = ctx.currentTime;
+            const elapsedTime = currentTime - startTime;
+            const visualBlock = Math.floor(elapsedTime / blockDuration) % totalBlocks;
+
+            // Update visual
+            const cells = gridContainer.querySelectorAll('.grid-cell');
+            cells.forEach((cell, i) => {
+                if (i === visualBlock) {
+                    cell.classList.add('active');
+                } else {
+                    cell.classList.remove('active');
+                }
+            });
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // Play function
+        function play() {
+            if (isPlaying) return;
+
+            unlockAudio();
+            const ctx = initAudio();
+
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
+
+            // Calculate block duration before starting
+            const bpm = parseInt(tempoInput.value);
+            const secondsPerBeat = 60.0 / bpm;
+            blockDuration = secondsPerBeat / (totalBlocks / parseInt(beatsInput.value));
+
+            isPlaying = true;
+            currentBlock = 0;
+            startTime = ctx.currentTime;
+            nextNoteTime = ctx.currentTime;
+
+            scheduler();
+            animate();
+
+            // Update button to show Stop
+            playBtn.innerHTML = '■ Stop';
+            playBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            playBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+        }
+
+        // Stop function
+        function stop() {
+            if (!isPlaying) return;
+
+            isPlaying = false;
+            currentBlock = 0;
+
+            if (timerID) {
+                clearTimeout(timerID);
+                timerID = null;
+            }
+
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+
+            // Clear visual highlight
+            const cells = gridContainer.querySelectorAll('.grid-cell');
+            cells.forEach(cell => cell.classList.remove('active'));
+
+            // Update button to show Play
+            playBtn.innerHTML = '▶ Play';
+            playBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+            playBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+        }
+
+        // Toggle play/stop
+        function togglePlay() {
+            if (isPlaying) {
+                stop();
+            } else {
+                play();
+            }
+        }
+
+        // Event listeners
+        playBtn.addEventListener('click', togglePlay);
+
+        // Regenerate grid when parameters change
+        bolsInput.addEventListener('change', () => {
+            stop();
+            generateGrid();
+        });
+        beatsInput.addEventListener('change', () => {
+            stop();
+            generateGrid();
+        });
+
+        // Initialize
+        generateGrid();
+    </script>
+</body>
+</html>
