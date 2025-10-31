@@ -23,11 +23,11 @@
 <body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
     <div class="max-w-7xl mx-auto">
         <h1 class="text-3xl md:text-4xl font-bold mb-2 text-center">Layakari Polyrhythm Trainer</h1>
+
         <div id="audioHint" class="text-center mb-6">
             <button id="enableAudioBtn" class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-lg">
-                🔊 Tap to Enable Audio
+                🔊 Tap to Enable Audio (You'll hear a beep)
             </button>
-            <p class="text-xs text-gray-400 mt-2">iPhone users: Check that your phone is not on silent mode</p>
         </div>
 
         <!-- Controls Section -->
@@ -120,15 +120,9 @@
             </div>
         </div>
 
-        <!-- iPhone Audio Troubleshooting -->
-        <div class="bg-gray-800 rounded-lg p-6 mt-6 border-l-4 border-yellow-500">
-            <h2 class="text-xl font-semibold mb-3">📱 iPhone Audio Not Working?</h2>
-            <div class="space-y-2 text-sm text-gray-300">
-                <p><strong class="text-white">1. Check Silent Mode:</strong> The physical switch on the left side of your iPhone should show orange if muted. Flip it to unmute.</p>
-                <p><strong class="text-white">2. Check Volume:</strong> Use the volume buttons on the side of your iPhone to turn up the volume.</p>
-                <p><strong class="text-white">3. Tap "Enable Audio":</strong> You should hear a brief beep sound. If you hear it, audio is working!</p>
-                <p><strong class="text-white">4. Try Safari:</strong> If using another browser, try opening in Safari instead (works best on iOS).</p>
-            </div>
+        <!-- iPhone Silent Mode Warning -->
+        <div class="bg-orange-900/50 border-2 border-orange-500 rounded-lg p-4 mt-6 text-center">
+            <p class="text-orange-200 font-semibold">📱 iPhone/iPad: No audio? Turn OFF Silent Mode</p>
         </div>
 
         <!-- Practice Instructions -->

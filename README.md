@@ -18,6 +18,7 @@ A web-based tabla polyrhythm training application with synchronized audio and vi
   - Yellow highlight shows current playback position
 - **Responsive Design**: Works on desktop and mobile devices
 - **Mobile-Friendly Audio**: Advanced audio unlock mechanism for iOS and strict mobile browsers
+  - **⚠️ iPhone users**: You MUST turn off silent mode (flip the switch on the left side - no orange showing) for audio to work
 
 ## Publishing to GitHub Pages
 
