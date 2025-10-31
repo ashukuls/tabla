@@ -23,7 +23,12 @@
 <body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
     <div class="max-w-7xl mx-auto">
         <h1 class="text-3xl md:text-4xl font-bold mb-2 text-center">Layakari Polyrhythm Trainer</h1>
-        <p id="audioHint" class="text-yellow-400 text-sm text-center mb-6">Tap anywhere to enable audio</p>
+        <div id="audioHint" class="text-center mb-6">
+            <button id="enableAudioBtn" class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-lg">
+                🔊 Tap to Enable Audio
+            </button>
+            <p class="text-xs text-gray-400 mt-2">iPhone users: Check that your phone is not on silent mode</p>
+        </div>
 
         <!-- Controls Section -->
         <div class="bg-gray-800 rounded-lg p-6 mb-6 space-y-6">
@@ -115,6 +120,17 @@
             </div>
         </div>
 
+        <!-- iPhone Audio Troubleshooting -->
+        <div class="bg-gray-800 rounded-lg p-6 mt-6 border-l-4 border-yellow-500">
+            <h2 class="text-xl font-semibold mb-3">📱 iPhone Audio Not Working?</h2>
+            <div class="space-y-2 text-sm text-gray-300">
+                <p><strong class="text-white">1. Check Silent Mode:</strong> The physical switch on the left side of your iPhone should show orange if muted. Flip it to unmute.</p>
+                <p><strong class="text-white">2. Check Volume:</strong> Use the volume buttons on the side of your iPhone to turn up the volume.</p>
+                <p><strong class="text-white">3. Tap "Enable Audio":</strong> You should hear a brief beep sound. If you hear it, audio is working!</p>
+                <p><strong class="text-white">4. Try Safari:</strong> If using another browser, try opening in Safari instead (works best on iOS).</p>
+            </div>
+        </div>
+
         <!-- Practice Instructions -->
         <div class="bg-gray-800 rounded-lg p-6 mt-6">
             <h2 class="text-xl font-semibold mb-4">How to Practice</h2>
@@ -192,55 +208,77 @@
             return audioContext;
         }
 
-        // Unlock audio on mobile (iOS Safari workaround)
-        function unlockAudio() {
-            // Hide the hint immediately on first interaction
-            const hint = document.getElementById('audioHint');
-            if (hint) hint.style.display = 'none';
+        // Play a test beep to verify audio is working
+        function playTestBeep() {
+            const ctx = audioContext;
+            if (!ctx) return;
 
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.frequency.value = 880;
+            gain.gain.value = 0.3;
+
+            const now = ctx.currentTime;
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+            osc.start(now);
+            osc.stop(now + 0.3);
+        }
+
+        // Unlock audio on mobile (iOS Safari workaround)
+        async function unlockAudio() {
             if (audioUnlocked) return Promise.resolve();
 
             const ctx = initAudio();
 
-            return new Promise((resolve, reject) => {
-                try {
-                    // Create and play a silent buffer
-                    const buffer = ctx.createBuffer(1, 1, 22050);
-                    const source = ctx.createBufferSource();
-                    source.buffer = buffer;
-                    source.connect(ctx.destination);
-                    source.start(0);
+            try {
+                // Create and play a silent buffer
+                const buffer = ctx.createBuffer(1, 1, 22050);
+                const source = ctx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(ctx.destination);
+                source.start(0);
 
-                    // Resume context
-                    ctx.resume().then(() => {
-                        audioUnlocked = true;
-                        console.log('Audio unlocked successfully, state:', ctx.state);
-                        resolve();
-                    }).catch((err) => {
-                        console.error('Failed to resume audio context:', err);
-                        reject(err);
-                    });
+                // Resume context - crucial for iOS
+                await ctx.resume();
+
+                audioUnlocked = true;
+                console.log('Audio unlocked successfully, state:', ctx.state);
+
+                // Play test beep
+                playTestBeep();
+
+                return Promise.resolve();
+            } catch (err) {
+                console.error('Failed to unlock audio:', err);
+                return Promise.reject(err);
+            }
+        }
+
+        // Explicit audio enable button handler
+        const enableAudioBtn = document.getElementById('enableAudioBtn');
+        if (enableAudioBtn) {
+            enableAudioBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    await unlockAudio();
+                    const hint = document.getElementById('audioHint');
+                    if (hint) {
+                        hint.innerHTML = '<p class="text-green-400 text-sm">✓ Audio Enabled! You can now press Play.</p>';
+                        setTimeout(() => {
+                            hint.style.display = 'none';
+                        }, 2000);
+                    }
                 } catch (err) {
-                    console.error('Failed to unlock audio:', err);
-                    reject(err);
+                    alert('Failed to enable audio. Please check your phone is not on silent mode.');
                 }
             });
         }
-
-        // Add multiple listeners for audio unlock (iOS can be finicky)
-        const unlockEvents = ['touchstart', 'touchend', 'click', 'pointerdown'];
-        let unlockAttempted = false;
-
-        unlockEvents.forEach(eventType => {
-            document.body.addEventListener(eventType, () => {
-                if (!unlockAttempted) {
-                    unlockAttempted = true;
-                    unlockAudio().catch(err => {
-                        console.error('Audio unlock error:', err);
-                    });
-                }
-            }, { once: true });
-        });
 
         // Sound Generation Functions
         function playBeat(time) {
