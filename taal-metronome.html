@@ -667,8 +667,18 @@ Ta Dhin Dhin Dha</textarea>
             }
         }
 
-        loadPresets();
-        calculateTaal();
+        loadPresets().then(() => {
+            // Select first preset by default
+            const firstPresetKey = Object.keys(PRESETS)[0];
+            if (firstPresetKey) {
+                presetSelect.value = firstPresetKey;
+                bolPatternInput.value = PRESETS[firstPresetKey].pattern;
+                if (PRESETS[firstPresetKey].tempo) {
+                    tempoInput.value = PRESETS[firstPresetKey].tempo;
+                }
+            }
+            calculateTaal();
+        });
     </script>
 </body>
 </html>
