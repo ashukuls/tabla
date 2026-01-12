@@ -58,6 +58,9 @@ Ta Dhin Dhin Dha</textarea>
                 <p class="text-xs text-gray-400 mt-1">
                     Notation: Capitals start subdivisions (TiRKiT = 4 subdivs), dash (-) = silent
                 </p>
+                <p class="text-xs text-gray-500 mt-1">
+                    Note: Bols are for visual reference only - the metronome plays clicks, not bol sounds.
+                </p>
             </div>
 
             <!-- Tempo Control -->
@@ -632,6 +635,9 @@ Ta Dhin Dhin Dha</textarea>
             if (presetKey && PRESETS[presetKey]) {
                 stop();
                 bolPatternInput.value = PRESETS[presetKey].pattern;
+                if (PRESETS[presetKey].tempo) {
+                    tempoInput.value = PRESETS[presetKey].tempo;
+                }
                 calculateTaal();
             }
         });

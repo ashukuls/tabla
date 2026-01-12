@@ -1,18 +1,22 @@
 {
   "teentaal-theka": {
     "name": "Teentaal Theka",
+    "tempo": 90,
     "pattern": "Dha--T Dhin--T DhinDhin Dha\nDha--T Dhin--T DhinDhin Dha\nDha--T Tin--T TinTin Ta\nTiRKiT Dhin--T DhinDhin Dha"
   },
   "bhajani": {
     "name": "Bhajni Theka",
+    "tempo": 120,
     "pattern": "Dhin- NaDhin -Dhin Na-\nDhin- NaTin -Tin Na"
   },
   "jhaptaal-kayda": {
     "name": "Jhap Taal Kayda",
+    "tempo": 50,
     "pattern": "DhaDhaTiT DhaTiTDha -TiTDha TiTDhaGe TinNaKeNa\nTaTaTiT TaTiTTa -TiTDha TiTDhaGe DhinNaGeNa"
   },
   "bedam-tihai": {
     "name": "Bedam Tihai Teen Taal",
+    "tempo": 90,
     "pattern": "Dha-TiRKiT DhiKiT KaTaGa DiGaNe\nKiTDha -NeDha TiRKiTDhi- KiTKa\nTGaDi GaNeKi TDha- Ne-Dha-TiR\nKiTDhi-Ki- TKaT GaDiGa NeKiT\nDha Dhin Dhin Dha\nDha Dhin Dhin Dha\nDha Tin Tin Ta\nTa Dhin Dhin Dha"
   }
 }
