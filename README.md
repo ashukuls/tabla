@@ -39,7 +39,7 @@ A web-based tabla polyrhythm training application with synchronized audio and vi
    - Click **Save**
 
 4. **Access your app**:
-   - Your app will be available at: `https://[your-username].github.io/[repository-name]/`
+   - Your app will be available at: `https://ashukuls.github.io/tabla/`
    - It may take a few minutes for the site to go live
 
 ## Usage

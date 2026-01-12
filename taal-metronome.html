@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taal Metronome</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .beat-cell {
+            transition: background-color 0.05s ease;
+        }
+        .beat-cell.active {
+            background-color: rgb(234, 179, 8) !important;
+        }
+        .subdiv-dot {
+            transition: background-color 0.05s ease;
+        }
+        .subdiv-dot.active {
+            background-color: rgb(234, 179, 8) !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl md:text-4xl font-bold mb-2 text-center">Taal Metronome</h1>
+
+        <div id="audioHint" class="text-center mb-6">
+            <button id="enableAudioBtn" class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-lg">
+                🔊 Tap to Enable Audio
+            </button>
+        </div>
+
+        <!-- Bol Pattern Editor -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6 space-y-6">
+            <div>
+                <label class="block text-sm font-medium mb-2">Preset</label>
+                <select id="presetSelect" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white mb-4 focus:outline-none focus:border-blue-500">
+                    <option value="">-- Select a preset --</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">
+                    Bol Pattern <span class="text-gray-400">(one vibhag per line, spaces separate beats)</span>
+                </label>
+                <textarea id="bolPattern" rows="4"
+                    class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white font-mono focus:outline-none focus:border-blue-500"
+                    placeholder="Dha Dhin Dhin Dha&#10;Dha Dhin Dhin Dha&#10;Dha Tin Tin Na&#10;Ta Dhin Dhin Dha">Dha Dhin Dhin Dha
+Dha Dhin Dhin Dha
+Dha Tin Tin Na
+Ta Dhin Dhin Dha</textarea>
+                <p class="text-xs text-gray-400 mt-1">
+                    Notation: Capitals start subdivisions (TiRKiT = 4 subdivs), dash (-) = silent
+                </p>
+            </div>
+
+            <!-- Tempo Control -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Tempo (BPM)</label>
+                    <input type="number" id="tempo" min="10" max="300" value="90"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <!-- Volume Controls -->
+            <div class="space-y-3">
+                <h3 class="text-sm font-semibold text-gray-300 uppercase tracking-wide">Volume Mix</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm mb-1 flex justify-between">
+                            <span>Vibhaag</span>
+                            <span id="beatVolLabel" class="text-gray-400">100%</span>
+                        </label>
+                        <input type="range" id="beatVol" min="0" max="100" value="100"
+                               class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1 flex justify-between">
+                            <span>Subdiv</span>
+                            <span id="subdivVolLabel" class="text-gray-400">100%</span>
+                        </label>
+                        <input type="range" id="subdivVol" min="0" max="100" value="100"
+                               class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-gray-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button id="playBtn"
+                        class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors">
+                    ▶ Play
+                </button>
+            </div>
+        </div>
+
+        <!-- Visualizer Section -->
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Taal Visualizer</h2>
+            <div id="visualizer" class="space-y-4">
+                <!-- Populated by JavaScript -->
+            </div>
+            <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-blue-500 rounded"></div>
+                    <span>Vibhag start</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-yellow-500 rounded"></div>
+                    <span>Current</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- iPhone Silent Mode Warning -->
+        <div class="bg-orange-900/50 border-2 border-orange-500 rounded-lg p-4 mt-6 text-center">
+            <p class="text-orange-200 font-semibold">📱 iPhone/iPad: No audio? Turn OFF Silent Mode</p>
+        </div>
+
+        <!-- Credit -->
+        <div class="text-center mt-8 pb-6">
+            <p class="text-gray-400 text-sm">
+                Inspired by my tabla teacher Shri Satish Tare
+                <a href="https://tablaniketan.com" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 underline">tablaniketan.com</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ==================== STATE ====================
+        let audioContext = null;
+        let isPlaying = false;
+        let audioUnlocked = false;
+        let nextNoteTime = 0;
+        let startTime = 0;
+        let currentEventIndex = 0;
+        let timerID = null;
+        let animationId = null;
+        const scheduleAheadTime = 0.1;
+        const lookahead = 25;
+
+        // Gain Nodes
+        let beatGain, subdivGain;
+
+        // Parsed taal data
+        let vibhags = [];
+        let beats = [];      // Flattened list of all beats
+        let timeline = [];   // Flattened list of all events (subdivisions)
+
+        // ==================== PRESETS ====================
+        let PRESETS = {};
+
+        // ==================== DOM ELEMENTS ====================
+        const presetSelect = document.getElementById('presetSelect');
+        const bolPatternInput = document.getElementById('bolPattern');
+        const tempoInput = document.getElementById('tempo');
+        const playBtn = document.getElementById('playBtn');
+        const visualizer = document.getElementById('visualizer');
+        const beatVolSlider = document.getElementById('beatVol');
+        const subdivVolSlider = document.getElementById('subdivVol');
+        const beatVolLabel = document.getElementById('beatVolLabel');
+        const subdivVolLabel = document.getElementById('subdivVolLabel');
+
+        // ==================== BOL PARSER ====================
+        function parseBol(word) {
+            if (!word || word.trim() === '') {
+                return { bol: '', subdivisions: 0, silentMask: [] };
+            }
+
+            const silentMask = [];
+            let subdivCount = 0;
+
+            for (let i = 0; i < word.length; i++) {
+                const char = word[i];
+                if (char === '-') {
+                    subdivCount++;
+                    silentMask.push(true);
+                } else if (char.match(/[A-Z]/)) {
+                    subdivCount++;
+                    silentMask.push(false);
+                }
+            }
+
+            // If no capitals found, treat whole word as 1 subdivision
+            if (subdivCount === 0) {
+                subdivCount = 1;
+                silentMask.push(false);
+            }
+
+            return {
+                bol: word,
+                subdivisions: subdivCount,
+                silentMask: silentMask
+            };
+        }
+
+        function parseVibhag(line) {
+            const words = line.trim().split(/\s+/).filter(w => w);
+            return words.map(parseBol);
+        }
+
+        function parseTaal(text) {
+            const lines = text.trim().split('\n').filter(l => l.trim());
+            return lines.map(parseVibhag);
+        }
+
+        // ==================== TAAL CALCULATION ====================
+        function calculateTaal() {
+            const text = bolPatternInput.value;
+            vibhags = parseTaal(text);
+
+            // Flatten beats and build timeline
+            beats = [];
+            timeline = [];
+            let globalBeatIndex = 0;
+            let vibhagCount = 1; // Start at 1, Sam doesn't count
+
+            vibhags.forEach((vibhag, vibhagIndex) => {
+                vibhag.forEach((beat, beatInVibhag) => {
+                    const isFirstBeatOfVibhag = beatInVibhag === 0;
+                    let marker = null;
+
+                    if (globalBeatIndex === 0) {
+                        marker = 'X'; // Sam
+                    } else if (isFirstBeatOfVibhag) {
+                        vibhagCount++;
+                        marker = String(vibhagCount);
+                    }
+
+                    const beatInfo = {
+                        ...beat,
+                        globalIndex: globalBeatIndex,
+                        vibhagIndex: vibhagIndex,
+                        beatInVibhag: beatInVibhag,
+                        marker: marker,
+                        isFirstBeatOfVibhag: isFirstBeatOfVibhag
+                    };
+                    beats.push(beatInfo);
+
+                    // Add subdivisions to timeline
+                    for (let s = 0; s < beat.subdivisions; s++) {
+                        timeline.push({
+                            beatIndex: globalBeatIndex,
+                            subdivIndex: s,
+                            isBeatStart: s === 0,
+                            isSilent: beat.silentMask[s] || false,
+                            marker: s === 0 ? marker : null
+                        });
+                    }
+
+                    globalBeatIndex++;
+                });
+            });
+
+            renderVisualizer();
+        }
+
+        // ==================== UI RENDERING ====================
+        function renderVisualizer() {
+            visualizer.innerHTML = '';
+
+            let globalBeatIndex = 0;
+            vibhags.forEach((vibhag, vibhagIndex) => {
+                const vibhagDiv = document.createElement('div');
+                vibhagDiv.className = 'border-l-4 pl-4 border-blue-500';
+
+                // Beats row
+                const beatsRow = document.createElement('div');
+                beatsRow.className = 'flex flex-wrap gap-2';
+
+                vibhag.forEach((beat, beatInVibhag) => {
+                    const beatCell = document.createElement('div');
+                    beatCell.className = 'beat-cell flex flex-col items-center justify-between p-2 rounded bg-gray-700 min-w-[60px]';
+                    beatCell.dataset.beatIndex = globalBeatIndex;
+
+                    // Bol text
+                    const bolText = document.createElement('div');
+                    bolText.className = 'text-sm font-medium truncate max-w-[80px]';
+                    bolText.textContent = beat.bol;
+                    bolText.title = beat.bol;
+
+                    // Subdivision dots
+                    const dotsContainer = document.createElement('div');
+                    dotsContainer.className = 'flex gap-1 my-1';
+                    for (let s = 0; s < beat.subdivisions; s++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'subdiv-dot w-2 h-2 rounded-full ' +
+                            (beat.silentMask[s] ? 'bg-gray-600' : 'bg-gray-500');
+                        dot.dataset.beatIndex = globalBeatIndex;
+                        dot.dataset.subdivIndex = s;
+                        dotsContainer.appendChild(dot);
+                    }
+
+                    // Beat number
+                    const beatNum = document.createElement('div');
+                    beatNum.className = 'text-xs text-gray-400';
+                    beatNum.textContent = globalBeatIndex + 1;
+
+                    beatCell.appendChild(bolText);
+                    beatCell.appendChild(dotsContainer);
+                    beatCell.appendChild(beatNum);
+                    beatsRow.appendChild(beatCell);
+
+                    globalBeatIndex++;
+                });
+
+                vibhagDiv.appendChild(beatsRow);
+                visualizer.appendChild(vibhagDiv);
+            });
+        }
+
+        // ==================== AUDIO SYSTEM ====================
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                beatGain = audioContext.createGain();
+                subdivGain = audioContext.createGain();
+
+                beatGain.connect(audioContext.destination);
+                subdivGain.connect(audioContext.destination);
+
+                updateVolumes();
+            }
+            return audioContext;
+        }
+
+        function playTestBeep() {
+            const ctx = audioContext;
+            if (!ctx) return;
+
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.frequency.value = 880;
+            gain.gain.value = 0.3;
+
+            const now = ctx.currentTime;
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+            osc.start(now);
+            osc.stop(now + 0.3);
+        }
+
+        async function unlockAudio() {
+            if (audioUnlocked) return Promise.resolve();
+
+            const ctx = initAudio();
+
+            try {
+                const buffer = ctx.createBuffer(1, 1, 22050);
+                const source = ctx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(ctx.destination);
+                source.start(0);
+
+                await ctx.resume();
+
+                audioUnlocked = true;
+                console.log('Audio unlocked successfully, state:', ctx.state);
+
+                playTestBeep();
+
+                return Promise.resolve();
+            } catch (err) {
+                console.error('Failed to unlock audio:', err);
+                return Promise.reject(err);
+            }
+        }
+
+        // Enable audio button
+        const enableAudioBtn = document.getElementById('enableAudioBtn');
+        if (enableAudioBtn) {
+            enableAudioBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    await unlockAudio();
+                    const hint = document.getElementById('audioHint');
+                    if (hint) {
+                        hint.innerHTML = '<p class="text-green-400 text-sm">✓ Audio Enabled!</p>';
+                        setTimeout(() => {
+                            hint.style.display = 'none';
+                        }, 2000);
+                    }
+                } catch (err) {
+                    alert('Failed to enable audio. Please check your phone is not on silent mode.');
+                }
+            });
+        }
+
+        // Sound generators
+        function playBeat(time) {
+            const ctx = audioContext;
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, time);
+
+            gainNode.gain.setValueAtTime(0.8, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+
+            osc.connect(gainNode);
+            gainNode.connect(beatGain);
+
+            osc.start(time);
+            osc.stop(time + 0.1);
+        }
+
+        function playSubdiv(time) {
+            const ctx = audioContext;
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.value = 1200;
+
+            gainNode.gain.setValueAtTime(0.5, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.02);
+
+            osc.connect(gainNode);
+            gainNode.connect(subdivGain);
+
+            osc.start(time);
+            osc.stop(time + 0.02);
+        }
+
+        function updateVolumes() {
+            if (!beatGain) return;
+
+            beatGain.gain.value = beatVolSlider.value / 100;
+            subdivGain.gain.value = subdivVolSlider.value / 100;
+
+            beatVolLabel.textContent = beatVolSlider.value + '%';
+            subdivVolLabel.textContent = subdivVolSlider.value + '%';
+        }
+
+        beatVolSlider.addEventListener('input', updateVolumes);
+        subdivVolSlider.addEventListener('input', updateVolumes);
+
+        // ==================== SCHEDULER ====================
+        function scheduler() {
+            const ctx = audioContext;
+            while (nextNoteTime < ctx.currentTime + scheduleAheadTime) {
+                scheduleEvent(timeline[currentEventIndex], nextNoteTime);
+                advanceNote();
+            }
+            timerID = setTimeout(scheduler, lookahead);
+        }
+
+        function scheduleEvent(event, time) {
+            if (!event) return;
+
+            // Skip silent subdivisions for subdiv sound only
+            if (!event.isSilent) {
+                playSubdiv(time);
+            }
+
+            // On beat start, play beat sound
+            if (event.isBeatStart && event.marker) {
+                playBeat(time);
+            }
+        }
+
+        function advanceNote() {
+            const bpm = parseInt(tempoInput.value) || 60;
+            const secondsPerBeat = 60.0 / bpm;
+
+            const event = timeline[currentEventIndex];
+            const beat = beats[event.beatIndex];
+
+            // Subdivision duration = beat duration / number of subdivisions in this beat
+            const subdivDuration = secondsPerBeat / beat.subdivisions;
+
+            nextNoteTime += subdivDuration;
+            currentEventIndex = (currentEventIndex + 1) % timeline.length;
+        }
+
+        // ==================== ANIMATION ====================
+        function animate() {
+            if (!isPlaying) return;
+
+            const ctx = audioContext;
+            const currentTime = ctx.currentTime;
+
+            // Find current position in timeline based on elapsed time
+            // We need to track which event we're at visually
+            const elapsedTime = currentTime - startTime;
+
+            // Calculate cumulative time to find current event
+            let cumulativeTime = 0;
+            let visualEventIndex = 0;
+            const bpm = parseInt(tempoInput.value) || 60;
+            const secondsPerBeat = 60.0 / bpm;
+
+            // Calculate total cycle duration
+            let totalCycleDuration = 0;
+            for (let i = 0; i < timeline.length; i++) {
+                const beat = beats[timeline[i].beatIndex];
+                totalCycleDuration += secondsPerBeat / beat.subdivisions;
+            }
+
+            // Find position in current cycle
+            const cyclePosition = elapsedTime % totalCycleDuration;
+
+            for (let i = 0; i < timeline.length; i++) {
+                const beat = beats[timeline[i].beatIndex];
+                const subdivDuration = secondsPerBeat / beat.subdivisions;
+
+                if (cumulativeTime + subdivDuration > cyclePosition) {
+                    visualEventIndex = i;
+                    break;
+                }
+                cumulativeTime += subdivDuration;
+            }
+
+            const currentEvent = timeline[visualEventIndex];
+
+            // Clear all highlights
+            document.querySelectorAll('.beat-cell').forEach(cell => {
+                cell.classList.remove('active');
+            });
+            document.querySelectorAll('.subdiv-dot').forEach(dot => {
+                dot.classList.remove('active');
+            });
+
+            // Highlight current beat cell
+            const beatCell = document.querySelector(`.beat-cell[data-beat-index="${currentEvent.beatIndex}"]`);
+            if (beatCell) {
+                beatCell.classList.add('active');
+            }
+
+            // Highlight current subdivision dot
+            const subdivDot = document.querySelector(
+                `.subdiv-dot[data-beat-index="${currentEvent.beatIndex}"][data-subdiv-index="${currentEvent.subdivIndex}"]`
+            );
+            if (subdivDot) {
+                subdivDot.classList.add('active');
+            }
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // ==================== PLAYBACK CONTROL ====================
+        async function play() {
+            if (isPlaying) return;
+
+            await unlockAudio();
+            const ctx = initAudio();
+
+            if (ctx.state === 'suspended') {
+                await ctx.resume();
+            }
+
+            if (ctx.state !== 'running') {
+                alert('Please tap the screen to enable audio, then press Play again.');
+                return;
+            }
+
+            isPlaying = true;
+            currentEventIndex = 0;
+            startTime = ctx.currentTime;
+            nextNoteTime = ctx.currentTime;
+
+            scheduler();
+            animate();
+
+            playBtn.innerHTML = '■ Stop';
+            playBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            playBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+        }
+
+        function stop() {
+            if (!isPlaying) return;
+
+            isPlaying = false;
+            currentEventIndex = 0;
+
+            if (timerID) {
+                clearTimeout(timerID);
+                timerID = null;
+            }
+
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+
+            // Clear highlights
+            document.querySelectorAll('.beat-cell').forEach(cell => {
+                cell.classList.remove('active');
+            });
+            document.querySelectorAll('.subdiv-dot').forEach(dot => {
+                dot.classList.remove('active');
+            });
+
+            playBtn.innerHTML = '▶ Play';
+            playBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+            playBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+        }
+
+        async function togglePlay() {
+            if (isPlaying) {
+                stop();
+            } else {
+                await play();
+            }
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        playBtn.addEventListener('click', togglePlay);
+
+        bolPatternInput.addEventListener('input', () => {
+            stop();
+            presetSelect.value = ''; // Clear preset selection when manually editing
+            calculateTaal();
+        });
+
+        presetSelect.addEventListener('change', () => {
+            const presetKey = presetSelect.value;
+            if (presetKey && PRESETS[presetKey]) {
+                stop();
+                bolPatternInput.value = PRESETS[presetKey].pattern;
+                calculateTaal();
+            }
+        });
+
+        tempoInput.addEventListener('change', () => {
+            let value = parseInt(tempoInput.value);
+            if (isNaN(value) || value < 10) tempoInput.value = 10;
+            else if (value > 300) tempoInput.value = 300;
+        });
+
+        // ==================== INITIALIZE ====================
+        async function loadPresets() {
+            try {
+                const response = await fetch('presets.json');
+                PRESETS = await response.json();
+
+                // Populate preset dropdown
+                presetSelect.innerHTML = '<option value="">-- Select a preset --</option>';
+                for (const [key, preset] of Object.entries(PRESETS)) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = preset.name;
+                    presetSelect.appendChild(option);
+                }
+            } catch (err) {
+                console.log('Could not load presets.json, using defaults');
+            }
+        }
+
+        loadPresets();
+        calculateTaal();
+    </script>
+</body>
+</html>
