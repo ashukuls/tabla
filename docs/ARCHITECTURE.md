@@ -44,9 +44,9 @@ Migrate from single-file HTML apps to a Firebase-based serverless architecture s
 | Language | **TypeScript** | Type safety, better DX, catches errors early |
 | Build | **Vite** (via SvelteKit) | Fast dev server, HMR, optimized builds |
 | Styling | **Tailwind CSS** | Utility-first, works great with Svelte |
-| Audio | **Tone.js** + samples | Precise scheduling, realistic tabla sounds |
+| Audio | **Tone.js** (synthesis) | Precise scheduling, no external files, works offline |
 | Database | Firestore | Serverless, generous free tier |
-| File Storage | Firebase Storage | For audio samples |
+| File Storage | Firebase Storage | For user uploads (optional) |
 | Hosting | Firebase Hosting | Integrated, fast CDN |
 | Auth | Firebase Auth (optional) | If user accounts needed later |
 

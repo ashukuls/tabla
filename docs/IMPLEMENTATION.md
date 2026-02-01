@@ -31,8 +31,6 @@ tabla/
 │   │       └── +page.svelte         # Polyrhythm trainer app
 │   └── app.html                     # HTML template
 ├── static/
-│   ├── samples/
-│   │   └── tabla/                   # Audio samples (.mp3)
 │   └── favicon.png
 ├── firebase.json                    # Firebase hosting config
 ├── firestore.rules                  # Security rules
@@ -41,67 +39,20 @@ tabla/
 ├── tsconfig.json                    # TypeScript config
 ├── package.json
 ├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── IMPLEMENTATION.md            # This file
-│   └── TASKS.md
+│   ├── ARCHITECTURE.md              # System design, tech stack, data models
+│   ├── IMPLEMENTATION.md            # This file - code examples
+│   ├── TABLA.md                     # Tabla acoustics & synthesis theory
+│   └── TASKS.md                     # Migration checklist
 └── README.md
 ```
 
 ## Audio System
 
-### Tone.js Tabla Player
+See **[TABLA.md](./TABLA.md)** for tabla acoustics, bol mappings, and Tone.js synthesis implementation.
 
-```typescript
-// src/lib/audio/tabla.ts
-import * as Tone from 'tone';
-import type { Bol } from '$lib/types';
-
-const BOL_SAMPLES: Record<Bol, string> = {
-  dha: 'dha.mp3',
-  dhin: 'dhin.mp3',
-  ti: 'ti.mp3',
-  ge: 'ge.mp3',
-  na: 'na.mp3',
-  ke: 'ke.mp3',
-  ta: 'ta.mp3',
-  tun: 'tun.mp3',
-  '-': '', // silence
-};
-
-class TablaPlayer {
-  private sampler: Tone.Sampler;
-  private metronome: Tone.MembraneSynth;
-
-  constructor() {
-    this.sampler = new Tone.Sampler({
-      urls: BOL_SAMPLES,
-      baseUrl: '/samples/tabla/',
-    }).toDestination();
-
-    this.metronome = new Tone.MembraneSynth().toDestination();
-  }
-
-  playBol(bol: Bol, time?: number): void {
-    if (bol !== '-') {
-      this.sampler.triggerAttack(bol, time);
-    }
-  }
-
-  setBpm(bpm: number): void {
-    Tone.Transport.bpm.value = bpm;
-  }
-
-  start(): void {
-    Tone.Transport.start();
-  }
-
-  stop(): void {
-    Tone.Transport.stop();
-  }
-}
-
-export const tablaPlayer = new TablaPlayer();
-```
+Key files:
+- `src/lib/audio/tabla.ts` — TablaPlayer class using MembraneSynth (bayan) + MetalSynth (dayan)
+- `src/lib/audio/metronome.ts` — Simple metronome click
 
 ### Svelte Store for Playback State
 
@@ -183,24 +134,6 @@ export async function getPresets(): Promise<Preset[]> {
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Preset));
 }
 ```
-
-## Sample Files Required
-
-| Bol | Description | Priority |
-|-----|-------------|----------|
-| dha | Bass + treble together | High |
-| dhin | Resonant bass | High |
-| ti/ta | Sharp treble | High |
-| ge/ghe | Muted bass | High |
-| na | Open treble | High |
-| ke/ka | Soft treble | Medium |
-| tun | Resonant open bass | Medium |
-| tin | Light treble | Low |
-
-**Source options:**
-- Record custom samples
-- Use royalty-free tabla sample packs
-- Generate with physical modeling (complex)
 
 ## Quick Start Commands
 

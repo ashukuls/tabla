@@ -15,10 +15,11 @@
 
 ### Phase 2: Audio System
 - [ ] Install Tone.js
-- [ ] Create `TablaPlayer` class
-- [ ] Source/record tabla samples (at least: dha, ti, ge, na)
-- [ ] Add samples to `static/samples/tabla/`
-- [ ] Create audio engine abstraction
+- [ ] Create `TablaPlayer` class with synthesis
+- [ ] Define synthesis parameters for each bol (dha, ti, ge, na, etc.)
+- [ ] Tune bass synth (MembraneSynth) for bayan sounds
+- [ ] Tune treble synth (MetalSynth) for dayan sounds
+- [ ] Implement combined strokes (dha = bass + treble)
 - [ ] Implement mobile audio unlock (iOS Safari)
 - [ ] Test latency and mobile compatibility
 
@@ -65,9 +66,9 @@
 
 1. **Authentication** — Require login to upload kaidas, or allow anonymous?
 2. **Moderation** — How to handle inappropriate uploads?
-3. **Sample licensing** — Record custom or use existing samples?
-4. **Offline support** — How important is PWA/offline capability?
-5. **Multiple taals** — Support all common taals or start with teen taal only?
+3. **Offline support** — How important is PWA/offline capability?
+4. **Multiple taals** — Support all common taals or start with teen taal only?
+5. **Synthesis tuning** — How realistic should the synth sounds be vs. just functional?
 
 ---
 
@@ -75,8 +76,8 @@
 
 1. [ ] Initialize SvelteKit project with TypeScript + Tailwind
 2. [ ] Create Firebase project in Google Console
-3. [ ] Source or record initial tabla samples
-4. [ ] Build proof-of-concept: Svelte component + Tone.js + one sample
+3. [ ] Build proof-of-concept: Svelte component + Tone.js synthesis
+4. [ ] Tune synthesis parameters for realistic tabla sounds
 5. [ ] Validate mobile audio latency
 6. [ ] Begin Phase 1 implementation
 
