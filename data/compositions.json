@@ -3,7 +3,7 @@
     "title": "Teentaal Theka",
     "taal": "Teentaal",
     "tempo": 60,
-    "bols": "Dha Dhin Dhin Dha\nDha Dhin Dhin Dha\nDha Tin Tin Ta\nTa Dhin Dhin Dha",
+    "bols": "Dha Dhin Dhin Dha Dha Dhin Dhin Dha\nDha Tin Tin Ta Ta Dhin Dhin Dha",
     "description": "The basic theka for Teentaal, the most common 16-beat cycle.",
     "author": "Traditional",
     "tags": ["theka", "beginner", "teentaal"]
@@ -12,7 +12,7 @@
     "title": "Jhaptaal Theka",
     "taal": "Jhaptaal",
     "tempo": 50,
-    "bols": "Dhin Na\nDhin Dhin Na\nTin Na\nDhin Dhin Na",
+    "bols": "Dhin Na Dhin Dhin Na\nTin Na Dhin Dhin Na",
     "description": "The basic theka for Jhaptaal, a 10-beat cycle (2+3+2+3).",
     "author": "Traditional",
     "tags": ["theka", "beginner", "jhaptaal"]
@@ -21,7 +21,7 @@
     "title": "Rupak Theka",
     "taal": "Rupak",
     "tempo": 55,
-    "bols": "Tin Tin Na\nDhin Na\nDhin Na",
+    "bols": "Tin Tin Na Dhin Na Dhin Na",
     "description": "7-beat cycle with khaali on sam. Divided 3+2+2.",
     "author": "Traditional",
     "tags": ["theka", "beginner", "rupak"]
@@ -30,7 +30,7 @@
     "title": "Ektaal Theka",
     "taal": "Ektaal",
     "tempo": 45,
-    "bols": "Dhin Dhin\nDha Ge\nTi Ra\nKe Ta\nTun Na\nKa Ta",
+    "bols": "Dhin Dhin Dha Ge Ti Ra\nKe Ta Tun Na Ka Ta",
     "description": "12-beat cycle commonly used in dhrupad and khayal.",
     "author": "Traditional",
     "tags": ["theka", "beginner", "ektaal"]
@@ -39,7 +39,7 @@
     "title": "Dadra Theka",
     "taal": "Dadra",
     "tempo": 80,
-    "bols": "Dha Dhin Na\nDha Tin Na",
+    "bols": "Dha Dhin Na Dha Tin Na",
     "description": "Light 6-beat cycle for semi-classical music.",
     "author": "Traditional",
     "tags": ["theka", "beginner", "dadra", "light"]
@@ -48,7 +48,7 @@
     "title": "Keherwa Theka",
     "taal": "Keherwa",
     "tempo": 90,
-    "bols": "Dha Ge Na Ti\nNa Ke Dhin Na",
+    "bols": "Dha Ge Na Ti Na Ke Dhin Na",
     "description": "8-beat cycle popular in folk and light classical.",
     "author": "Traditional",
     "tags": ["theka", "beginner", "keherwa", "folk"]
@@ -57,7 +57,7 @@
     "title": "Teentaal Kayda 1",
     "taal": "Teentaal",
     "tempo": 60,
-    "bols": "Dha Ti Dha Ge\nNa Dha Ti Dha\nDha Ti Dha Ge\nDhin Na Ge Na\nTa Ti Ta Ke\nNa Ta Ti Ta\nDha Ti Dha Ge\nDhin Na Ge Na",
+    "bols": "Dha Ti Dha Ge Na Dha Ti Dha Dha Ti Dha Ge Dhin Na Ge Na\nTa Ti Ta Ke Na Ta Ti Ta Dha Ti Dha Ge Dhin Na Ge Na",
     "description": "Basic kayda (compositional theme) for Teentaal.",
     "author": "Traditional",
     "tags": ["kayda", "intermediate", "teentaal"]
@@ -66,7 +66,7 @@
     "title": "Simple Tukda",
     "taal": "Teentaal",
     "tempo": 70,
-    "bols": "Dha Dha Ti Ti\nDha Dha Ge Na\nDha Ti Dha Ge\nDhin Na Ge Na",
+    "bols": "Dha Dha Ti Ti Dha Dha Ge Na\nDha Ti Dha Ge Dhin Na Ge Na",
     "description": "A simple tukda (fixed composition) ending with tihai.",
     "author": "Traditional",
     "tags": ["tukda", "beginner", "teentaal", "tihai"]
