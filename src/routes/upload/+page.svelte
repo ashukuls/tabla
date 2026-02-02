@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { createComposition, getComposition, updateComposition } from '$lib/firebase/db';
@@ -76,7 +77,8 @@
 
 	// Check for edit param on mount
 	onMount(() => {
-		const id = $page.url.searchParams.get('edit');
+		const currentPage = get(page);
+		const id = currentPage.url.searchParams.get('edit');
 		if (id) {
 			loadComposition(id);
 		}
