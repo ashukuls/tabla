@@ -1,0 +1,23 @@
+services:
+  tabla:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    networks:
+      - shared-services
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tabla.rule=Host(`tabla.nuc.home`)"
+      - "traefik.http.routers.tabla.entrypoints=http"
+      - "traefik.http.services.tabla.loadbalancer.server.port=3000"
+
+networks:
+  shared-services:
+    external: true

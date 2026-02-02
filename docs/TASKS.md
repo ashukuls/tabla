@@ -1,85 +1,129 @@
-# Tasks: Tabla Apps Migration
+# Tasks: Tabla Apps (Next.js)
+
+## Design Principles
+
+- **Mobile-first**: Design for small screens first, enhance for desktop
+- **Touch-friendly**: Large tap targets (44px min), swipe gestures where useful
+- **Responsive**: Fluid layouts with Tailwind breakpoints (sm/md/lg)
+- **Audio on mobile**: Handle iOS Safari audio unlock, minimize latency
 
 ## Migration Phases
 
 ### Phase 1: Project Setup
-- [x] Initialize SvelteKit project (`npm create svelte@latest`)
-- [x] Configure TypeScript (strict mode)
-- [x] Add Tailwind CSS
-- [x] Create Firebase project in Google Console
-- [x] Install Firebase SDK (`firebase`)
-- [x] Configure Firestore with security rules
-- [x] Set up Firebase Hosting adapter for SvelteKit
-- [x] Set up local development environment
-- [ ] Create `.env` file with Firebase config
+- [ ] Initialize Next.js 14+ project with App Router
+- [ ] Configure TypeScript (strict mode)
+- [ ] Add Tailwind CSS 4
+- [ ] Set up Firebase SDK (`firebase`)
+- [ ] Create `lib/firebase/config.ts` with env vars
+- [ ] Create `lib/firebase/db.ts` with Firestore helpers
+- [ ] Configure Firebase Hosting for Next.js
+- [ ] Create `.env.local` with Firebase config
 
 ### Phase 2: Audio System
-- [x] Install Tone.js
-- [x] Create `TablaPlayer` class with synthesis
-- [x] Define synthesis parameters for each bol (dha, ti, ge, na, etc.)
-- [x] Tune bass synth (MembraneSynth) for bayan sounds
-- [x] Tune treble synth (MetalSynth) for dayan sounds
-- [x] Implement combined strokes (dha = bass + treble)
-- [x] Implement mobile audio unlock (iOS Safari)
+- [ ] Install Tone.js
+- [ ] Create `lib/audio/tabla.ts` - TablaPlayer class
+- [ ] Define synthesis parameters for each bol
+- [ ] Tune MembraneSynth for bayan (bass) sounds
+- [ ] Tune MetalSynth for dayan (treble) sounds
+- [ ] Implement combined strokes (dha = bass + treble)
+- [ ] Create `lib/audio/metronome.ts`
+- [ ] Implement mobile audio unlock (iOS Safari)
 - [ ] Test latency and mobile compatibility
 
-### Phase 3: Tabla Player App
-- [x] Create `/player` route
-- [x] Design UI for bol input/display
-- [x] Implement bol parsing (text → array)
-- [x] Create `BolGrid.svelte` component
-- [x] Create `PlaybackControls.svelte` component
-- [x] Connect to Tone.js sampler
-- [x] Add tempo slider
-- [x] Implement kaida save to Firestore
-- [x] Implement kaida load from Firestore
+### Phase 3: Core Components
+- [ ] Create `components/BolGrid.tsx` - responsive grid (stacks on mobile)
+- [ ] Create `components/PlaybackControls.tsx` - large touch targets
+- [ ] Create `components/TempoSlider.tsx` - thumb-friendly slider
+- [ ] Create `components/TaalSelector.tsx` - dropdown/modal on mobile
+- [ ] Create `components/CompositionCard.tsx` - card layout
+- [ ] Create `components/AudioUnlockButton.tsx` - iOS Safari unlock
+- [ ] Implement bol parser (`lib/parser.ts`)
 
-### Phase 4: Polyrhythm Trainer Migration
-- [x] Create `/trainer` route
-- [x] Port existing polyrhythm logic to TypeScript
-- [x] Replace Web Audio API with Tone.js
-- [x] Create Svelte components for grid/controls
-- [x] Connect presets to Firestore
-- [x] Maintain feature parity with current app
-- [ ] Test mobile/desktop grid layouts
+### Phase 4: Pages/Routes
+- [ ] Landing page (`app/page.tsx`)
+- [ ] Browse compositions (`app/browse/page.tsx`)
+- [ ] Tabla player (`app/player/page.tsx`)
+- [ ] Upload/edit composition (`app/upload/page.tsx`)
+- [ ] Polyrhythm trainer (`app/trainer/page.tsx`)
+- [ ] Metronome (`app/metronome/page.tsx`)
+- [ ] Sound lab (`app/lab/page.tsx`)
 
-### Phase 5: User Features
-- [x] Kaida upload form with validation
-- [x] Browse public kaidas page
-- [x] Search/filter by taal
-- [x] Taal selector component
-- [ ] (Optional) Firebase Auth integration
-- [ ] (Optional) Personal saved kaidas
+### Phase 5: Features
+- [ ] Composition CRUD (create, read, update, delete)
+- [ ] Search/filter compositions by title, taal, tags
+- [ ] Sort by newest/oldest/title
+- [ ] Inline playback in browse page
+- [ ] Edit mode via `?edit={id}` query param
+- [ ] Load composition via `?load={id}` in player
+- [ ] Polyrhythm pattern calculation (N over D)
 
 ### Phase 6: Polish
 - [ ] PWA manifest and service worker
-- [ ] Offline audio sample caching
+- [ ] Offline audio caching
 - [ ] Performance optimization (lazy loading)
-- [ ] Mobile responsiveness audit
+- [ ] Final mobile/tablet/desktop testing
 - [ ] Error handling and user feedback
-- [ ] Loading states
-- [ ] Analytics (Firebase Analytics)
+- [ ] Loading states and skeletons
+- [ ] Touch gesture refinements (swipe, long-press)
+- [ ] (Optional) Firebase Auth integration
+- [ ] (Optional) Firebase Analytics
+
+---
+
+## Project Structure
+
+```
+tabla/
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── browse/page.tsx
+│   ├── player/page.tsx
+│   ├── upload/page.tsx
+│   ├── trainer/page.tsx
+│   ├── metronome/page.tsx
+│   └── lab/page.tsx
+├── components/
+│   ├── BolGrid.tsx
+│   ├── PlaybackControls.tsx
+│   ├── TempoSlider.tsx
+│   ├── TaalSelector.tsx
+│   └── CompositionCard.tsx
+├── lib/
+│   ├── audio/
+│   │   ├── tabla.ts
+│   │   └── metronome.ts
+│   ├── firebase/
+│   │   ├── config.ts
+│   │   └── db.ts
+│   ├── parser.ts
+│   └── types.ts
+├── data/
+│   └── compositions.json
+├── scripts/
+│   └── seed.ts
+└── docs/
+```
 
 ---
 
 ## Open Questions
 
-1. **Authentication** — Require login to upload kaidas, or allow anonymous?
+1. **Authentication** — Require login to upload, or allow anonymous?
 2. **Moderation** — How to handle inappropriate uploads?
 3. **Offline support** — How important is PWA/offline capability?
-4. **Multiple taals** — Support all common taals or start with teen taal only?
-5. **Synthesis tuning** — How realistic should the synth sounds be vs. just functional?
+4. **Multiple taals** — Support all common taals or start with Teentaal only?
 
 ---
 
 ## Next Steps
 
-1. [ ] Initialize SvelteKit project with TypeScript + Tailwind
-2. [ ] Create Firebase project in Google Console
-3. [ ] Build proof-of-concept: Svelte component + Tone.js synthesis
-4. [ ] Tune synthesis parameters for realistic tabla sounds
-5. [ ] Validate mobile audio latency
-6. [ ] Begin Phase 1 implementation
+1. [ ] Initialize Next.js project (`npx create-next-app@latest`)
+2. [ ] Set up Tailwind CSS 4
+3. [ ] Configure Firebase and create env file
+4. [ ] Build audio system with Tone.js
+5. [ ] Create core components
+6. [ ] Implement routes one by one
 
 ---
 
