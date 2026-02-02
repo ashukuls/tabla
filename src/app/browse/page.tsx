@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getCompositions } from '@/lib/firebase/db';
 import { TAALS } from '@/lib/types';
+import BolGrid from '@/components/BolGrid';
 import type { Composition } from '@/lib/types';
 
 export default function BrowsePage() {
@@ -12,6 +13,7 @@ export default function BrowsePage() {
   const [search, setSearch] = useState('');
   const [taalFilter, setTaalFilter] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title'>('newest');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     getCompositions()
@@ -41,6 +43,10 @@ export default function BrowsePage() {
       const dateB = new Date(b.createdAt || 0).getTime();
       return sortBy === 'newest' ? dateB - dateA : dateA - dateB;
     });
+
+  const toggleExpand = (id: string) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
 
   return (
     <main className="min-h-screen p-4 sm:p-8">
@@ -110,64 +116,93 @@ export default function BrowsePage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {filtered.map((comp) => (
-              <div
-                key={comp.id}
-                className="bg-white rounded-2xl shadow-lg border-2 border-amber-200 p-4 sm:p-6"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-semibold text-amber-900 truncate">
-                      {comp.meta.title || 'Untitled'}
-                    </h2>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-sm">
-                        {comp.meta.taal}
-                      </span>
-                      <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-sm">
-                        {comp.meta.tempo} BPM
-                      </span>
-                      {comp.meta.author && (
-                        <span className="text-amber-500 text-sm">
-                          by {comp.meta.author}
-                        </span>
-                      )}
-                    </div>
-                    {comp.meta.description && (
-                      <p className="text-amber-600 text-sm mt-2 line-clamp-2">
-                        {comp.meta.description}
-                      </p>
-                    )}
-                    {comp.meta.tags && comp.meta.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {comp.meta.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-0.5 bg-amber-50 text-amber-600 rounded text-xs"
-                          >
-                            #{tag}
+            {filtered.map((comp) => {
+              const isExpanded = expandedId === comp.id;
+
+              return (
+                <div
+                  key={comp.id}
+                  className="bg-white rounded-2xl shadow-lg border-2 border-amber-200 overflow-hidden"
+                >
+                  {/* Header - always visible */}
+                  <div
+                    className="p-4 sm:p-6 cursor-pointer hover:bg-amber-50 transition-colors"
+                    onClick={() => toggleExpand(comp.id)}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-amber-400 text-lg">
+                            {isExpanded ? '▼' : '▶'}
                           </span>
-                        ))}
+                          <h2 className="text-lg font-semibold text-amber-900 truncate">
+                            {comp.meta.title || 'Untitled'}
+                          </h2>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2 ml-6">
+                          <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-sm">
+                            {comp.meta.taal}
+                          </span>
+                          <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-sm">
+                            {comp.meta.tempo} BPM
+                          </span>
+                          {comp.meta.author && (
+                            <span className="text-amber-500 text-sm">
+                              by {comp.meta.author}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    )}
+                      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Link
+                          href={`/player?load=${comp.id}`}
+                          className="px-4 py-2 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 active:scale-95 transition-all"
+                        >
+                          Play
+                        </Link>
+                        <Link
+                          href={`/upload?edit=${comp.id}`}
+                          className="px-4 py-2 bg-white border-2 border-amber-200 text-amber-700 rounded-xl font-medium hover:border-amber-400 active:scale-95 transition-all"
+                        >
+                          Edit
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <Link
-                      href={`/player?load=${comp.id}`}
-                      className="px-4 py-2 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 active:scale-95 transition-all text-center"
-                    >
-                      Play
-                    </Link>
-                    <Link
-                      href={`/upload?edit=${comp.id}`}
-                      className="px-4 py-2 bg-white border-2 border-amber-200 text-amber-700 rounded-xl font-medium hover:border-amber-400 active:scale-95 transition-all text-center"
-                    >
-                      Edit
-                    </Link>
-                  </div>
+
+                  {/* Expanded content */}
+                  {isExpanded && (
+                    <div className="border-t-2 border-amber-100 p-4 sm:p-6 bg-amber-50/50">
+                      {/* Description */}
+                      {comp.meta.description && (
+                        <p className="text-amber-700 mb-4">
+                          {comp.meta.description}
+                        </p>
+                      )}
+
+                      {/* Tags */}
+                      {comp.meta.tags && comp.meta.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {comp.meta.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-2 py-0.5 bg-amber-100 text-amber-600 rounded text-xs"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Full composition grid */}
+                      <div className="bg-white rounded-xl p-4 border border-amber-200">
+                        <BolGrid rows={comp.rows} />
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

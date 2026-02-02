@@ -5,7 +5,7 @@ import Link from 'next/link';
 import * as Tone from 'tone';
 import AudioUnlockButton from '@/components/AudioUnlockButton';
 import PlaybackControls from '@/components/PlaybackControls';
-import TempoSlider from '@/components/TempoSlider';
+import TempoInput from '@/components/TempoInput';
 
 interface PolyrhythmPattern {
   totalBlocks: number;
@@ -177,7 +177,9 @@ export default function TrainerPage() {
             </div>
           </div>
 
-          <TempoSlider tempo={tempo} onChange={setTempo} />
+          <div className="flex justify-center">
+              <TempoInput tempo={tempo} onChange={setTempo} />
+            </div>
         </div>
 
         {/* Pattern Grid */}

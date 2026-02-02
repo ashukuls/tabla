@@ -26,12 +26,6 @@ const features = [
     icon: '🥁',
   },
   {
-    href: '/metronome',
-    title: 'Metronome',
-    description: 'Taal metronome',
-    icon: '⏱️',
-  },
-  {
     href: '/lab',
     title: 'Lab',
     description: 'Sound experiments',

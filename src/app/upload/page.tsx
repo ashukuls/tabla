@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import BolGrid from '@/components/BolGrid';
 import TaalSelector from '@/components/TaalSelector';
-import TempoSlider from '@/components/TempoSlider';
+import TempoInput from '@/components/TempoInput';
 import { parseComposition } from '@/lib/parser';
 import {
   createComposition,
@@ -167,8 +167,8 @@ function UploadContent() {
           {/* Taal & Tempo */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <TaalSelector value={taal} onChange={setTaal} />
-            <div>
-              <TempoSlider tempo={tempo} onChange={setTempo} />
+            <div className="flex items-end">
+              <TempoInput tempo={tempo} onChange={setTempo} />
             </div>
           </div>
 
