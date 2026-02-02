@@ -25,9 +25,9 @@ const DAYAN_PARAMS: Record<string, BolParams> = {
 
 // Bayan (bass) parameters for each bol
 const BAYAN_PARAMS: Record<string, BolParams> = {
-	ghe: { frequency: 120, decay: 0.25, pitchDecay: 0.08, octaves: 4 },
-	ga:  { frequency: 120, decay: 0.25, pitchDecay: 0.08, octaves: 4 },
-	ge:  { frequency: 120, decay: 0.25, pitchDecay: 0.08, octaves: 4 },
+	ghe: { frequency: 120, decay: 0.5, pitchDecay: 0.1, octaves: 3 },
+	ga:  { frequency: 120, decay: 0.5, pitchDecay: 0.1, octaves: 3 },
+	ge:  { frequency: 120, decay: 0.5, pitchDecay: 0.1, octaves: 3 },
 	ke:  { frequency: 80, decay: 0.08, pitchDecay: 0.05, octaves: 2 },
 	kat: { frequency: 80, decay: 0.08, pitchDecay: 0.05, octaves: 2 },
 };
@@ -68,16 +68,16 @@ export class TablaPlayer {
 		}).toDestination();
 		this.dayanSynth.frequency.value = 800;
 
-		// Bayan (bass) - membrane with pitch glissando
+		// Bayan (bass) - membrane with pitch glissando (meend effect)
 		this.bayanSynth = new Tone.MembraneSynth({
-			pitchDecay: 0.08,
-			octaves: 4,
+			pitchDecay: 0.1,           // Slower slide for the "Meend" effect
+			octaves: 3,                // Reduced range for a more natural thud
 			oscillator: { type: 'sine' },
 			envelope: {
-				attack: 0.001,
-				decay: 0.4,
-				sustain: 0.01,
-				release: 0.4,
+				attack: 0.02,          // Softer attack (fingertip vs hard slap)
+				decay: 0.5,            // Long resonance
+				sustain: 0,            // Drums naturally decay, they don't sustain
+				release: 1,
 			},
 		}).toDestination();
 

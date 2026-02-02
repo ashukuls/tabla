@@ -20,12 +20,12 @@
 
 	// Bayan (MembraneSynth) parameters
 	let bayanFrequency = $state(120);
-	let bayanDecay = $state(0.4);
-	let bayanPitchDecay = $state(0.08);
-	let bayanOctaves = $state(4);
-	let bayanAttack = $state(0.001);
-	let bayanSustain = $state(0.01);
-	let bayanRelease = $state(0.4);
+	let bayanDecay = $state(0.5);
+	let bayanPitchDecay = $state(0.1);
+	let bayanOctaves = $state(3);
+	let bayanAttack = $state(0.02);
+	let bayanSustain = $state(0);
+	let bayanRelease = $state(1);
 	let bayanOscType = $state<'sine' | 'triangle' | 'square' | 'sawtooth'>('sine');
 
 	// Presets
@@ -38,9 +38,9 @@
 	};
 
 	const BAYAN_PRESETS = {
-		'Ghe (open)': { frequency: 120, decay: 0.25, pitchDecay: 0.08, octaves: 4, oscType: 'sine' as const },
+		'Ghe (open)': { frequency: 120, decay: 0.5, pitchDecay: 0.1, octaves: 3, oscType: 'sine' as const },
 		'Ke (muted)': { frequency: 80, decay: 0.08, pitchDecay: 0.05, octaves: 2, oscType: 'sine' as const },
-		'Deep bass': { frequency: 60, decay: 0.5, pitchDecay: 0.15, octaves: 6, oscType: 'sine' as const },
+		'Deep bass': { frequency: 60, decay: 0.7, pitchDecay: 0.15, octaves: 4, oscType: 'sine' as const },
 		'Punchy': { frequency: 100, decay: 0.15, pitchDecay: 0.03, octaves: 3, oscType: 'triangle' as const },
 		'Tight': { frequency: 150, decay: 0.1, pitchDecay: 0.02, octaves: 2, oscType: 'sine' as const },
 	};

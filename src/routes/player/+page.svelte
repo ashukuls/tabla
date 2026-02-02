@@ -52,14 +52,21 @@
 		const tabla = getTablaPlayer();
 		if (!tabla.ready || rows.length === 0) return;
 
+		const beatDuration = 60 / tempo;
+
 		while (nextNoteTime < Tone.now() + scheduleAheadTime) {
-			// Get current bol
+			// Get current beat
 			const row = rows[currentRow];
 			if (row && row.beats[currentBeat]) {
 				const beat = row.beats[currentBeat];
-				beat.bols.forEach((bol) => {
+				const numBols = beat.bols.length;
+				const subdivDuration = beatDuration / numBols;
+
+				// Schedule each bol evenly across the beat
+				beat.bols.forEach((bol, index) => {
 					if (bol !== '-') {
-						tabla.playBol(bol, nextNoteTime);
+						const bolTime = nextNoteTime + index * subdivDuration;
+						tabla.playBol(bol, bolTime);
 					}
 				});
 			}
@@ -68,8 +75,8 @@
 			const totalBeats = rows[currentRow]?.beats.length || 1;
 			playback.advance(totalBeats, rows.length);
 
-			// Calculate next note time
-			nextNoteTime += 60 / tempo;
+			// Calculate next note time (move to next beat)
+			nextNoteTime += beatDuration;
 		}
 	}
 
