@@ -1,0 +1,131 @@
+[
+  {
+    "meta": {
+      "title": "Teentaal Theka",
+      "taal": "Teentaal",
+      "tempo": 60,
+      "description": "The basic theka (rhythmic pattern) for Teentaal, the most common 16-beat cycle in Hindustani classical music.",
+      "author": "Traditional",
+      "tags": ["theka", "beginner", "teentaal"]
+    },
+    "rows": [
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Dhin"] }, { "bols": ["Dhin"] }, { "bols": ["Dha"] }] },
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Dhin"] }, { "bols": ["Dhin"] }, { "bols": ["Dha"] }] },
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Tin"] }, { "bols": ["Tin"] }, { "bols": ["Ta"] }] },
+      { "beats": [{ "bols": ["Ta"] }, { "bols": ["Dhin"] }, { "bols": ["Dhin"] }, { "bols": ["Dha"] }] }
+    ]
+  },
+  {
+    "meta": {
+      "title": "Jhaptaal Theka",
+      "taal": "Jhaptaal",
+      "tempo": 50,
+      "description": "The basic theka for Jhaptaal, a 10-beat cycle divided into 2+3+2+3 pattern.",
+      "author": "Traditional",
+      "tags": ["theka", "beginner", "jhaptaal"]
+    },
+    "rows": [
+      { "beats": [{ "bols": ["Dhin"] }, { "bols": ["Na"] }] },
+      { "beats": [{ "bols": ["Dhin"] }, { "bols": ["Dhin"] }, { "bols": ["Na"] }] },
+      { "beats": [{ "bols": ["Tin"] }, { "bols": ["Na"] }] },
+      { "beats": [{ "bols": ["Dhin"] }, { "bols": ["Dhin"] }, { "bols": ["Na"] }] }
+    ]
+  },
+  {
+    "meta": {
+      "title": "Rupak Theka",
+      "taal": "Rupak",
+      "tempo": 55,
+      "description": "The basic theka for Rupak taal, a 7-beat cycle with khaali on sam. Divided 3+2+2.",
+      "author": "Traditional",
+      "tags": ["theka", "beginner", "rupak"]
+    },
+    "rows": [
+      { "beats": [{ "bols": ["Tin"] }, { "bols": ["Tin"] }, { "bols": ["Na"] }] },
+      { "beats": [{ "bols": ["Dhin"] }, { "bols": ["Na"] }] },
+      { "beats": [{ "bols": ["Dhin"] }, { "bols": ["Na"] }] }
+    ]
+  },
+  {
+    "meta": {
+      "title": "Ektaal Theka",
+      "taal": "Ektaal",
+      "tempo": 45,
+      "description": "The basic theka for Ektaal, a 12-beat cycle commonly used in dhrupad and khayal.",
+      "author": "Traditional",
+      "tags": ["theka", "beginner", "ektaal"]
+    },
+    "rows": [
+      { "beats": [{ "bols": ["Dhin"] }, { "bols": ["Dhin"] }] },
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Ge"] }] },
+      { "beats": [{ "bols": ["Ti"] }, { "bols": ["Ra"] }] },
+      { "beats": [{ "bols": ["Ke"] }, { "bols": ["Ta"] }] },
+      { "beats": [{ "bols": ["Tun"] }, { "bols": ["Na"] }] },
+      { "beats": [{ "bols": ["Ka"] }, { "bols": ["Ta"] }] }
+    ]
+  },
+  {
+    "meta": {
+      "title": "Dadra Theka",
+      "taal": "Dadra",
+      "tempo": 80,
+      "description": "The basic theka for Dadra, a light 6-beat cycle often used in semi-classical music.",
+      "author": "Traditional",
+      "tags": ["theka", "beginner", "dadra", "light"]
+    },
+    "rows": [
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Dhin"] }, { "bols": ["Na"] }] },
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Tin"] }, { "bols": ["Na"] }] }
+    ]
+  },
+  {
+    "meta": {
+      "title": "Keherwa Theka",
+      "taal": "Keherwa",
+      "tempo": 90,
+      "description": "The basic theka for Keherwa, an 8-beat cycle popular in folk and light classical music.",
+      "author": "Traditional",
+      "tags": ["theka", "beginner", "keherwa", "folk"]
+    },
+    "rows": [
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Ge"] }, { "bols": ["Na"] }, { "bols": ["Ti"] }] },
+      { "beats": [{ "bols": ["Na"] }, { "bols": ["Ke"] }, { "bols": ["Dhin"] }, { "bols": ["Na"] }] }
+    ]
+  },
+  {
+    "meta": {
+      "title": "Teentaal Kayda 1",
+      "taal": "Teentaal",
+      "tempo": 60,
+      "description": "A basic kayda (compositional theme) in Teentaal. The fundamental pattern that can be varied through paltas.",
+      "author": "Traditional",
+      "tags": ["kayda", "intermediate", "teentaal"]
+    },
+    "rows": [
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Ti"] }, { "bols": ["Dha"] }, { "bols": ["Ge"] }] },
+      { "beats": [{ "bols": ["Na"] }, { "bols": ["Dha"] }, { "bols": ["Ti"] }, { "bols": ["Dha"] }] },
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Ti"] }, { "bols": ["Dha"] }, { "bols": ["Ge"] }] },
+      { "beats": [{ "bols": ["Dhin"] }, { "bols": ["Na"] }, { "bols": ["Ge"] }, { "bols": ["Na"] }] },
+      { "beats": [{ "bols": ["Ta"] }, { "bols": ["Ti"] }, { "bols": ["Ta"] }, { "bols": ["Ke"] }] },
+      { "beats": [{ "bols": ["Na"] }, { "bols": ["Ta"] }, { "bols": ["Ti"] }, { "bols": ["Ta"] }] },
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Ti"] }, { "bols": ["Dha"] }, { "bols": ["Ge"] }] },
+      { "beats": [{ "bols": ["Dhin"] }, { "bols": ["Na"] }, { "bols": ["Ge"] }, { "bols": ["Na"] }] }
+    ]
+  },
+  {
+    "meta": {
+      "title": "Simple Tukda",
+      "taal": "Teentaal",
+      "tempo": 70,
+      "description": "A simple tukda (fixed composition) ending with a tihai.",
+      "author": "Traditional",
+      "tags": ["tukda", "beginner", "teentaal", "tihai"]
+    },
+    "rows": [
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Dha"] }, { "bols": ["Ti"] }, { "bols": ["Ti"] }] },
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Dha"] }, { "bols": ["Ge"] }, { "bols": ["Na"] }] },
+      { "beats": [{ "bols": ["Dha"] }, { "bols": ["Ti"] }, { "bols": ["Dha"] }, { "bols": ["Ge"] }] },
+      { "beats": [{ "bols": ["Dhin"] }, { "bols": ["Na"] }, { "bols": ["Ge"] }, { "bols": ["Na"] }] }
+    ]
+  }
+]
