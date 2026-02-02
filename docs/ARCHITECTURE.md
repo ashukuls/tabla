@@ -1,165 +1,115 @@
-# Architecture: Tabla Apps
+# Tabla App Architecture
 
 ## Overview
 
-Migrate from single-file HTML apps to a Firebase-based serverless architecture supporting two applications:
-1. **Tabla Player** — Convert bol notation to audio playback
-2. **Polyrhythm Trainer** — Existing layakari trainer with enhanced features
+Indian Classical Rhythm Trainer - a web-based tabla practice application with:
+- Composition browser with playback
+- Tabla player for creating/playing compositions
+- Polyrhythm trainer (N bols over D beats)
+- Taal-aware metronome
+- Sound lab for synthesis experimentation
 
-## Current State
+## Pages/Routes
 
-- Single `index.html` file with embedded CSS/JS
-- No backend or database
-- Audio synthesis via raw Web Audio API (basic oscillators)
-- Static hosting on GitHub Pages
-- Presets hardcoded in JavaScript
+| Route | Purpose |
+|-------|---------|
+| `/` | Landing page with links to all features |
+| `/browse` | Browse compositions with search, filter, playback |
+| `/player` | Create and play compositions |
+| `/upload` | Upload/edit compositions (use `?edit={id}` for editing) |
+| `/trainer` | Polyrhythm trainer |
+| `/metronome` | Taal metronome |
+| `/lab` | Sound synthesis experimentation |
 
-## Target Architecture
+## Key Features
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Firebase Hosting                         │
-│  ┌─────────────────┐         ┌─────────────────┐           │
-│  │  Tabla Player   │         │ Polyrhythm      │           │
-│  │  App            │         │ Trainer App     │           │
-│  └────────┬────────┘         └────────┬────────┘           │
-└───────────┼───────────────────────────┼─────────────────────┘
-            │                           │
-            ▼                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Firebase Services                         │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
-│  │  Firestore  │  │  Storage    │  │    Auth     │         │
-│  │  (kaidas,   │  │  (audio     │  │  (optional) │         │
-│  │   presets)  │  │   samples)  │  │             │         │
-│  └─────────────┘  └─────────────┘  └─────────────┘         │
-└─────────────────────────────────────────────────────────────┘
-```
+### Composition Browser (`/browse`)
+- Fetch compositions from Firebase
+- Search by title, author, description, tags
+- Filter by taal
+- Sort by newest/oldest/title
+- Inline playback with BolGrid visualization
+- Edit button links to `/upload?edit={id}`
 
-## Tech Stack
+### Composition Upload/Edit (`/upload`)
+- Form: title, taal, tempo, bols, author, description, tags
+- Real-time bol parsing and preview
+- Edit mode: load existing composition via `?edit={id}` query param
+- Validates bols, tempo range (20-300 BPM)
 
-| Layer | Technology | Rationale |
-|-------|------------|-----------|
-| Framework | **SvelteKit** | Compiled, reactive, minimal runtime, routing built-in |
-| Language | **TypeScript** | Type safety, better DX, catches errors early |
-| Build | **Vite** (via SvelteKit) | Fast dev server, HMR, optimized builds |
-| Styling | **Tailwind CSS** | Utility-first, works great with Svelte |
-| Audio | **Tone.js** (synthesis) | Precise scheduling, no external files, works offline |
-| Database | Firestore | Serverless, generous free tier |
-| File Storage | Firebase Storage | For user uploads (optional) |
-| Hosting | Firebase Hosting | Integrated, fast CDN |
-| Auth | Firebase Auth (optional) | If user accounts needed later |
+### Tabla Player (`/player`)
+- Load compositions or enter bols manually
+- Visual grid showing current position
+- Playback controls (play/pause/stop, tempo)
+- Load from URL: `?load={compositionId}`
 
-## Data Models
+### Polyrhythm Trainer (`/trainer`)
+- Configure N bols over D beats
+- Visual grid showing polyrhythm pattern
+- Three audio layers: beat, bol, subdivision
+- Volume controls for each layer
 
-### TypeScript Types
+### Metronome (`/metronome`)
+- Taal selection (Teentaal, Jhaptaal, etc.)
+- Visual beat indicators
+- Subdivision clicks (laghu)
+- Shows sam/taali/khaali positions
 
-```typescript
-// src/lib/types/index.ts
+## Tech Stack (for Next.js rebuild)
 
-type Bol = 'dha' | 'dhin' | 'ti' | 'ta' | 'ge' | 'ghe' | 'na' | 'ke' | 'ka' | 'tun' | 'tin' | '-';
+- **Framework**: Next.js 14+ with App Router
+- **Styling**: Tailwind CSS 4
+- **Audio**: Tone.js
+- **Database**: Firebase Firestore
+- **Fonts**: Google Fonts (Noto Sans)
 
-type TaalName = 'teental' | 'jhaptaal' | 'ektaal' | 'rupak' | 'dadra';
+## Design System
 
-interface Kaida {
-  id: string;
-  name: string;
-  description?: string;
-  taal: TaalName;
-  beats: number;
-  tempo: number;
-  bols: Bol[];
+- Primary colors: Amber (50-900)
+- Background: Gradient from amber-50 to orange-100
+- Cards: White with rounded-2xl, shadow-lg, border-2 border-amber-200
+- Buttons: bg-amber-500 hover:bg-amber-600
+- Font: Noto Sans (400, 600, 700 weights)
 
-  // Metadata
-  createdAt: Date;
-  updatedAt: Date;
-  createdBy: string;
-  isPublic: boolean;
+## Audio Scheduling Pattern
 
-  // Optional
-  tags?: string[];
-  source?: string;
-}
-
-interface Taal {
-  id: TaalName;
-  name: string;
-  beats: number;
-  vibhags: number[];      // beat groupings
-  sam: number;            // emphasized beat
-  khali: number;          // wave beat
-  theka: Bol[];
-}
-
-interface Preset {
-  id: string;
-  name: string;
-  bols: number;
-  beats: number;
-  tempo: number;
-  bolLabels: string[];
-  createdBy: string;
-  isPublic: boolean;
-}
-```
-
-### Firestore Collections
-
-| Collection | Type | Description |
-|------------|------|-------------|
-| `kaidas` | `Kaida` | User-uploaded tabla compositions |
-| `taals` | `Taal` | Reference data for taal definitions |
-| `presets` | `Preset` | Polyrhythm trainer presets |
-
-## Firestore Security Rules
+Uses "look-ahead" scheduling for precise timing:
 
 ```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Taals: read-only reference data
-    match /taals/{taalId} {
-      allow read: if true;
-      allow write: if false;
-    }
+const scheduleAheadTime = 0.1; // seconds
+const lookahead = 25; // ms interval
 
-    // Kaidas: public read, authenticated write
-    match /kaidas/{kaidaId} {
-      allow read: if resource.data.isPublic == true;
-      allow create: if true;  // or require auth
-      allow update, delete: if false;  // or check ownership
-    }
-
-    // Presets: similar to kaidas
-    match /presets/{presetId} {
-      allow read: if true;
-      allow create: if true;
-      allow update, delete: if false;
-    }
+function scheduler() {
+  while (nextNoteTime < Tone.now() + scheduleAheadTime) {
+    // Schedule note at nextNoteTime
+    playSound(nextNoteTime);
+    // Advance to next beat
+    nextNoteTime += beatDuration;
   }
+}
+
+// Start scheduler
+schedulerInterval = setInterval(scheduler, lookahead);
+```
+
+## Mobile Audio Unlock (iOS Safari)
+
+iOS requires user gesture to start audio:
+
+```javascript
+async function unlockAudio() {
+  await Tone.start();
+  const ctx = Tone.getContext().rawContext;
+  if (ctx.state === 'suspended') {
+    await ctx.resume();
+  }
+  // Play silent buffer
+  const buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ctx.destination);
+  source.start(0);
 }
 ```
 
-## Cost Estimate
-
-### Free Tier (Spark Plan) — Sufficient for MVP
-
-| Service | Free Allowance | Expected Usage |
-|---------|----------------|----------------|
-| Hosting | 10 GB storage | ~5 MB |
-| Hosting | 360 MB/day bandwidth | ~10 MB/day |
-| Firestore | 1 GB storage | ~1 MB |
-| Firestore | 50K reads/day | ~500/day |
-| Firestore | 20K writes/day | ~50/day |
-| Storage | 5 GB | ~50 MB samples |
-
-**Estimated monthly cost: $0** for low traffic
-
-### Growth Scenario (Blaze Plan)
-
-If traffic grows to 1000+ monthly users:
-- Firestore: ~$1-5/month
-- Hosting bandwidth: ~$1-2/month
-- Storage: ~$0.50/month
-
-**Estimated: $5-10/month** at moderate scale
+Show "Tap to Enable Audio" button and call `unlockAudio()` on click.
