@@ -3,24 +3,24 @@
 ## Migration Phases
 
 ### Phase 1: Project Setup
-- [ ] Initialize SvelteKit project (`npm create svelte@latest`)
-- [ ] Configure TypeScript (strict mode)
-- [ ] Add Tailwind CSS
-- [ ] Create Firebase project in Google Console
-- [ ] Install Firebase SDK (`firebase`)
-- [ ] Configure Firestore with security rules
-- [ ] Set up Firebase Hosting adapter for SvelteKit
-- [ ] Set up local development environment
+- [x] Initialize SvelteKit project (`npm create svelte@latest`)
+- [x] Configure TypeScript (strict mode)
+- [x] Add Tailwind CSS
+- [x] Create Firebase project in Google Console
+- [x] Install Firebase SDK (`firebase`)
+- [x] Configure Firestore with security rules
+- [x] Set up Firebase Hosting adapter for SvelteKit
+- [x] Set up local development environment
 - [ ] Create `.env` file with Firebase config
 
 ### Phase 2: Audio System
-- [ ] Install Tone.js
-- [ ] Create `TablaPlayer` class with synthesis
-- [ ] Define synthesis parameters for each bol (dha, ti, ge, na, etc.)
-- [ ] Tune bass synth (MembraneSynth) for bayan sounds
-- [ ] Tune treble synth (MetalSynth) for dayan sounds
-- [ ] Implement combined strokes (dha = bass + treble)
-- [ ] Implement mobile audio unlock (iOS Safari)
+- [x] Install Tone.js
+- [x] Create `TablaPlayer` class with synthesis
+- [x] Define synthesis parameters for each bol (dha, ti, ge, na, etc.)
+- [x] Tune bass synth (MembraneSynth) for bayan sounds
+- [x] Tune treble synth (MetalSynth) for dayan sounds
+- [x] Implement combined strokes (dha = bass + treble)
+- [x] Implement mobile audio unlock (iOS Safari)
 - [ ] Test latency and mobile compatibility
 
 ### Phase 3: Tabla Player App
