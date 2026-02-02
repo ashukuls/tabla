@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { get } from 'svelte/store';
+	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { createComposition, getComposition, updateComposition } from '$lib/firebase/db';
 	import { parseComposition, rowsToText } from '$lib/utils/bolParser';
 	import TaalSelector from '$lib/components/TaalSelector.svelte';
@@ -75,11 +74,13 @@
 		}
 	}
 
-	// Check for edit param on mount
-	onMount(() => {
-		const currentPage = get(page);
-		const id = currentPage.url.searchParams.get('edit');
-		if (id) {
+	// Check for edit param reactively (only in browser)
+	let loadedId: string | null = null;
+	$effect(() => {
+		if (!browser) return;
+		const id = page.url.searchParams.get('edit');
+		if (id && id !== loadedId) {
+			loadedId = id;
 			loadComposition(id);
 		}
 	});
@@ -168,6 +169,17 @@
 		<h1 class="text-4xl font-bold text-amber-900 mb-8">
 			{isEditMode ? 'Edit Composition' : 'Upload Composition'}
 		</h1>
+
+		<!-- Debug info -->
+		{#if browser}
+		<div class="bg-gray-100 p-4 rounded mb-4 text-xs font-mono">
+			<p>URL edit param: {page.url.searchParams.get('edit') || 'none'}</p>
+			<p>loadedId: {loadedId || 'null'}</p>
+			<p>isLoading: {isLoading}</p>
+			<p>editId: {editId || 'null'}</p>
+			<p>errorMessage: {errorMessage || 'none'}</p>
+		</div>
+		{/if}
 
 		{#if isLoading}
 			<div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-amber-200 text-center">
