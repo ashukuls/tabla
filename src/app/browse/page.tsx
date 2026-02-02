@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getCompositions } from '@/lib/firebase/db';
+import { parseComposition } from '@/lib/parser';
 import { TAALS } from '@/lib/types';
 import BolGrid from '@/components/BolGrid';
 import type { Composition } from '@/lib/types';
@@ -26,18 +27,18 @@ export default function BrowsePage() {
     .filter((comp) => {
       const matchesSearch =
         !search ||
-        comp.meta.title?.toLowerCase().includes(search.toLowerCase()) ||
-        comp.meta.author?.toLowerCase().includes(search.toLowerCase()) ||
-        comp.meta.description?.toLowerCase().includes(search.toLowerCase()) ||
-        comp.meta.tags?.some((tag) =>
+        comp.title?.toLowerCase().includes(search.toLowerCase()) ||
+        comp.author?.toLowerCase().includes(search.toLowerCase()) ||
+        comp.description?.toLowerCase().includes(search.toLowerCase()) ||
+        comp.tags?.some((tag) =>
           tag.toLowerCase().includes(search.toLowerCase())
         );
-      const matchesTaal = !taalFilter || comp.meta.taal === taalFilter;
+      const matchesTaal = !taalFilter || comp.taal === taalFilter;
       return matchesSearch && matchesTaal;
     })
     .sort((a, b) => {
       if (sortBy === 'title') {
-        return (a.meta.title || '').localeCompare(b.meta.title || '');
+        return (a.title || '').localeCompare(b.title || '');
       }
       const dateA = new Date(a.createdAt || 0).getTime();
       const dateB = new Date(b.createdAt || 0).getTime();
@@ -118,6 +119,7 @@ export default function BrowsePage() {
           <div className="space-y-4">
             {filtered.map((comp) => {
               const isExpanded = expandedId === comp.id;
+              const rows = isExpanded && comp.bols ? parseComposition(comp.bols) : [];
 
               return (
                 <div
@@ -136,19 +138,19 @@ export default function BrowsePage() {
                             {isExpanded ? '▼' : '▶'}
                           </span>
                           <h2 className="text-lg font-semibold text-amber-900 truncate">
-                            {comp.meta.title || 'Untitled'}
+                            {comp.title || 'Untitled'}
                           </h2>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2 ml-6">
                           <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-sm">
-                            {comp.meta.taal}
+                            {comp.taal}
                           </span>
                           <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-sm">
-                            {comp.meta.tempo} BPM
+                            {comp.tempo} BPM
                           </span>
-                          {comp.meta.author && (
+                          {comp.author && (
                             <span className="text-amber-500 text-sm">
-                              by {comp.meta.author}
+                              by {comp.author}
                             </span>
                           )}
                         </div>
@@ -174,16 +176,16 @@ export default function BrowsePage() {
                   {isExpanded && (
                     <div className="border-t-2 border-amber-100 p-4 sm:p-6 bg-amber-50/50">
                       {/* Description */}
-                      {comp.meta.description && (
+                      {comp.description && (
                         <p className="text-amber-700 mb-4">
-                          {comp.meta.description}
+                          {comp.description}
                         </p>
                       )}
 
                       {/* Tags */}
-                      {comp.meta.tags && comp.meta.tags.length > 0 && (
+                      {comp.tags && comp.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-4">
-                          {comp.meta.tags.map((tag) => (
+                          {comp.tags.map((tag) => (
                             <span
                               key={tag}
                               className="px-2 py-0.5 bg-amber-100 text-amber-600 rounded text-xs"
@@ -196,7 +198,7 @@ export default function BrowsePage() {
 
                       {/* Full composition grid */}
                       <div className="bg-white rounded-xl p-4 border border-amber-200">
-                        <BolGrid rows={comp.rows} />
+                        <BolGrid rows={rows} />
                       </div>
                     </div>
                   )}

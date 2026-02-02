@@ -49,10 +49,10 @@ function PlayerContent() {
       getComposition(idToLoad)
         .then((comp) => {
           if (comp) {
-            setRows(comp.rows);
-            setTitle(comp.meta.title || '');
-            setTempo(comp.meta.tempo || 60);
-            setBolInput('');
+            setTitle(comp.title || '');
+            setTempo(comp.tempo || 60);
+            setBolInput(comp.bols || '');
+            setRows(comp.bols ? parseComposition(comp.bols) : []);
             setShowSelector(false);
           }
         })
@@ -60,14 +60,13 @@ function PlayerContent() {
     }
   }, [loadId, selectedId]);
 
-  // Parse bol input
+  // Parse bol input when typing manually
   useEffect(() => {
-    if (bolInput.trim()) {
+    if (!loadId && !selectedId && bolInput.trim()) {
       const parsed = parseComposition(bolInput);
       setRows(parsed);
-      setTitle('');
     }
-  }, [bolInput]);
+  }, [bolInput, loadId, selectedId]);
 
   const stopPlayback = useCallback(() => {
     if (schedulerRef.current) {
@@ -214,9 +213,9 @@ function PlayerContent() {
                               : 'bg-amber-50 hover:bg-amber-100 text-amber-900'
                           }`}
                         >
-                          <div className="font-medium">{comp.meta.title || 'Untitled'}</div>
+                          <div className="font-medium">{comp.title || 'Untitled'}</div>
                           <div className={`text-sm ${selectedId === comp.id ? 'text-amber-100' : 'text-amber-500'}`}>
-                            {comp.meta.taal} · {comp.meta.tempo} BPM
+                            {comp.taal} · {comp.tempo} BPM
                           </div>
                         </button>
                       ))}

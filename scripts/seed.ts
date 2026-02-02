@@ -1,7 +1,7 @@
 /**
  * Seed Firestore with compositions from data/compositions.json
  *
- * Usage: npx tsx scripts/seed.ts
+ * Usage: npm run seed
  */
 
 import { initializeApp } from 'firebase/app';
@@ -26,6 +26,16 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+interface CompositionData {
+  title: string;
+  taal: string;
+  tempo: number;
+  bols: string;
+  description?: string;
+  author?: string;
+  tags?: string[];
+}
+
 async function seed() {
   console.log('Initializing Firebase...');
 
@@ -41,7 +51,9 @@ async function seed() {
 
   // Load compositions from JSON
   const compositionsPath = resolve(__dirname, '../data/compositions.json');
-  const compositionsData = JSON.parse(readFileSync(compositionsPath, 'utf-8'));
+  const compositionsData: CompositionData[] = JSON.parse(
+    readFileSync(compositionsPath, 'utf-8')
+  );
 
   console.log(`Loaded ${compositionsData.length} compositions from JSON`);
 
@@ -49,7 +61,7 @@ async function seed() {
   const compositionsRef = collection(db, 'compositions');
   const existingSnapshot = await getDocs(compositionsRef);
   const existingTitles = new Set(
-    existingSnapshot.docs.map((doc) => doc.data().meta?.title)
+    existingSnapshot.docs.map((doc) => doc.data().title)
   );
 
   console.log(`Found ${existingTitles.size} existing compositions in Firestore`);
@@ -59,8 +71,8 @@ async function seed() {
   let skipped = 0;
 
   for (const comp of compositionsData) {
-    if (existingTitles.has(comp.meta.title)) {
-      console.log(`  Skipping "${comp.meta.title}" (already exists)`);
+    if (existingTitles.has(comp.title)) {
+      console.log(`  Skipping "${comp.title}" (already exists)`);
       skipped++;
       continue;
     }
@@ -71,7 +83,7 @@ async function seed() {
       updatedAt: new Date().toISOString(),
     });
 
-    console.log(`  Added "${comp.meta.title}"`);
+    console.log(`  Added "${comp.title}"`);
     added++;
   }
 

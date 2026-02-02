@@ -15,21 +15,16 @@ export interface Row {
   beats: Beat[];
 }
 
-// Composition metadata
-export interface CompositionMeta {
+// Composition stored in Firebase (simplified)
+export interface Composition {
+  id: string;
+  title: string;
   taal: string;
   tempo: number;
-  title?: string;
+  bols: string;           // raw text, parsed at runtime
   description?: string;
   author?: string;
   tags?: string[];
-}
-
-// Full composition structure (Firebase document)
-export interface Composition {
-  id: string;
-  meta: CompositionMeta;
-  rows: Row[];
   createdAt?: string;
   updatedAt?: string;
 }

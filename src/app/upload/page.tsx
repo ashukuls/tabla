@@ -12,7 +12,6 @@ import {
   getComposition,
   updateComposition,
 } from '@/lib/firebase/db';
-import type { Row } from '@/lib/types';
 
 function UploadContent() {
   const router = useRouter();
@@ -22,14 +21,16 @@ function UploadContent() {
   const [title, setTitle] = useState('');
   const [taal, setTaal] = useState('Teentaal');
   const [tempo, setTempo] = useState(60);
-  const [bolInput, setBolInput] = useState('');
+  const [bols, setBols] = useState('');
   const [author, setAuthor] = useState('');
   const [description, setDescription] = useState('');
   const [tagsInput, setTagsInput] = useState('');
-  const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // Parse bols for preview
+  const rows = bols.trim() ? parseComposition(bols) : [];
 
   // Load composition for editing
   useEffect(() => {
@@ -38,35 +39,18 @@ function UploadContent() {
       getComposition(editId)
         .then((comp) => {
           if (comp) {
-            setTitle(comp.meta.title || '');
-            setTaal(comp.meta.taal || 'Teentaal');
-            setTempo(comp.meta.tempo || 60);
-            setAuthor(comp.meta.author || '');
-            setDescription(comp.meta.description || '');
-            setTagsInput(comp.meta.tags?.join(', ') || '');
-            // Convert rows back to text
-            const text = comp.rows
-              .map((row) =>
-                row.beats.map((beat) => beat.bols.join('')).join(' ')
-              )
-              .join('\n');
-            setBolInput(text);
-            setRows(comp.rows);
+            setTitle(comp.title || '');
+            setTaal(comp.taal || 'Teentaal');
+            setTempo(comp.tempo || 60);
+            setBols(comp.bols || '');
+            setAuthor(comp.author || '');
+            setDescription(comp.description || '');
+            setTagsInput(comp.tags?.join(', ') || '');
           }
         })
         .finally(() => setLoading(false));
     }
   }, [editId]);
-
-  // Parse bol input
-  useEffect(() => {
-    if (bolInput.trim()) {
-      const parsed = parseComposition(bolInput);
-      setRows(parsed);
-    } else {
-      setRows([]);
-    }
-  }, [bolInput]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +61,7 @@ function UploadContent() {
       return;
     }
 
-    if (rows.length === 0) {
+    if (!bols.trim()) {
       setError('Please enter some bols');
       return;
     }
@@ -96,15 +80,13 @@ function UploadContent() {
         .filter(Boolean);
 
       const data = {
-        meta: {
-          title: title.trim(),
-          taal,
-          tempo,
-          author: author.trim() || undefined,
-          description: description.trim() || undefined,
-          tags: tags.length > 0 ? tags : undefined,
-        },
-        rows,
+        title: title.trim(),
+        taal,
+        tempo,
+        bols: bols.trim(),
+        author: author.trim() || undefined,
+        description: description.trim() || undefined,
+        tags: tags.length > 0 ? tags : undefined,
       };
 
       if (editId) {
@@ -178,14 +160,13 @@ function UploadContent() {
               Bols *
             </label>
             <textarea
-              value={bolInput}
-              onChange={(e) => setBolInput(e.target.value)}
+              value={bols}
+              onChange={(e) => setBols(e.target.value)}
               placeholder="Dha Dhin Dhin Dha | Dha Dhin Dhin Dha&#10;Dha Tin Tin Ta | Ta Dhin Dhin Dha"
               className="w-full p-3 bg-white border-2 border-amber-200 rounded-xl text-amber-900 focus:border-amber-400 focus:outline-none min-h-[120px] font-mono"
             />
             <p className="text-amber-500 text-sm mt-1">
-              Separate bols with spaces. Use | for visual grouping. New line for
-              new row.
+              Separate bols with spaces. Use | for visual grouping. New line for new row.
             </p>
           </div>
 
