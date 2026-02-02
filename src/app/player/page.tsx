@@ -10,7 +10,7 @@ import PlaybackControls from '@/components/PlaybackControls';
 import TempoInput from '@/components/TempoInput';
 import { getTablaPlayer } from '@/lib/audio/tabla';
 import { getCompositions, getComposition } from '@/lib/firebase/db';
-import { parseComposition, getAllBols } from '@/lib/parser';
+import { parseComposition } from '@/lib/parser';
 import type { Row, Composition } from '@/lib/types';
 
 function PlayerContent() {
@@ -35,6 +35,12 @@ function PlayerContent() {
   const schedulerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const nextNoteTimeRef = useRef(0);
   const currentBolIndexRef = useRef(0);
+  const tempoRef = useRef(tempo);
+
+  // Keep tempoRef in sync with tempo state
+  useEffect(() => {
+    tempoRef.current = tempo;
+  }, [tempo]);
 
   // Load all compositions for selector
   useEffect(() => {
@@ -87,10 +93,13 @@ function PlayerContent() {
       await player.init();
     }
 
-    const allBols = getAllBols(rows);
-    if (allBols.length === 0) return;
+    // Flatten rows into array of beats with subdivisions
+    // Each beat may have multiple bols that split the beat duration
+    const allBeats = rows.flatMap((row, rowIdx) =>
+      row.beats.map((beat, beatIdx) => ({ beat, rowIdx, beatIdx }))
+    );
+    if (allBeats.length === 0) return;
 
-    const beatDuration = 60 / tempo;
     const scheduleAheadTime = 0.1;
     const lookahead = 25;
 
@@ -98,39 +107,36 @@ function PlayerContent() {
     nextNoteTimeRef.current = Tone.now() + 0.1;
 
     const scheduler = () => {
+      // Read current tempo from ref for live updates
+      const beatDuration = 60 / tempoRef.current;
+
       while (nextNoteTimeRef.current < Tone.now() + scheduleAheadTime) {
-        const bolIndex = currentBolIndexRef.current;
-        const bol = allBols[bolIndex];
+        const beatIndex = currentBolIndexRef.current;
+        const { beat, rowIdx, beatIdx } = allBeats[beatIndex];
 
-        // Calculate row and beat position
-        let remaining = bolIndex;
-        let rowIdx = 0;
-        let beatIdx = 0;
-        for (let r = 0; r < rows.length; r++) {
-          if (remaining < rows[r].beats.length) {
-            rowIdx = r;
-            beatIdx = remaining;
-            break;
-          }
-          remaining -= rows[r].beats.length;
+        // Schedule all bols in this beat as subdivisions
+        const numBols = beat.bols.length;
+        const subdivisionDuration = beatDuration / numBols;
+
+        for (let i = 0; i < numBols; i++) {
+          const bol = beat.bols[i];
+          const bolTime = nextNoteTimeRef.current + (i * subdivisionDuration);
+          player.playBol(bol, bolTime);
         }
-
-        // Schedule the sound
-        player.playBol(bol, nextNoteTimeRef.current);
 
         // Update UI
         setCurrentRow(rowIdx);
         setCurrentBeat(beatIdx);
 
-        // Advance
+        // Advance to next beat
         nextNoteTimeRef.current += beatDuration;
-        currentBolIndexRef.current = (bolIndex + 1) % allBols.length;
+        currentBolIndexRef.current = (beatIndex + 1) % allBeats.length;
       }
     };
 
     schedulerRef.current = setInterval(scheduler, lookahead);
     setIsPlaying(true);
-  }, [rows, tempo]);
+  }, [rows]);
 
   const handlePlay = () => {
     if (!isPlaying) startPlayback();

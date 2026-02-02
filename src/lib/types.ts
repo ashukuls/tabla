@@ -15,6 +15,18 @@ export interface Row {
   beats: Beat[];
 }
 
+// Composition category
+export type CompositionCategory = 'theka' | 'kaida' | 'rela' | 'tukda' | 'chakradar' | 'other';
+
+export const CATEGORIES: { value: CompositionCategory; label: string }[] = [
+  { value: 'theka', label: 'Theka' },
+  { value: 'kaida', label: 'Kaida' },
+  { value: 'rela', label: 'Rela' },
+  { value: 'tukda', label: 'Tukda' },
+  { value: 'chakradar', label: 'Chakradar' },
+  { value: 'other', label: 'Other' },
+];
+
 // Composition stored in Firebase (simplified)
 export interface Composition {
   id: string;
@@ -22,6 +34,7 @@ export interface Composition {
   taal: string;
   tempo: number;
   bols: string;           // raw text, parsed at runtime
+  category?: CompositionCategory;
   description?: string;
   author?: string;
   tags?: string[];

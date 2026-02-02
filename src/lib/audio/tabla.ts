@@ -2,123 +2,88 @@
 
 import * as Tone from 'tone';
 
-interface DayanParams {
-  frequency: number;
-  decay: number;
-  attack: number;
-  harmonicity: number;
-}
-
-interface BayanParams {
-  frequency: number;
-  decay: number;
-  attack: number;
-  pitchDecay: number;
-  octaves: number;
-}
-
-// Dayan (treble) parameters - derived from sample analysis
-// Ta/Na: 1315 Hz fundamental, complex harmonics (0.6, 1.38, 2.03, 1.16)
-// Tin: 295 Hz fundamental, harmonics (1.78, 2.66, 6.27)
-const DAYAN_PARAMS: Record<string, DayanParams> = {
-  ta: { frequency: 1315, decay: 0.15, attack: 0.001, harmonicity: 5.1 },
-  na: { frequency: 1315, decay: 0.15, attack: 0.001, harmonicity: 5.1 },
-  tin: { frequency: 295, decay: 0.2, attack: 0.004, harmonicity: 3.5 },
-  tun: { frequency: 295, decay: 0.2, attack: 0.004, harmonicity: 3.5 },
-  te: { frequency: 1100, decay: 0.08, attack: 0.001, harmonicity: 6.0 },
-  ti: { frequency: 1100, decay: 0.08, attack: 0.001, harmonicity: 6.0 },
-  ra: { frequency: 800, decay: 0.1, attack: 0.002, harmonicity: 4.0 },
-  ka: { frequency: 1000, decay: 0.08, attack: 0.001, harmonicity: 5.5 },
+// Default sample variations
+const DEFAULT_SAMPLES: Record<string, string> = {
+  Dha: '01',
+  Dhin: '01',
+  Dhit: '01',
+  Dhun: '01',
+  Ga: '01',
+  Ge: '01',
+  Ke: '01',
+  Na: '01',
+  Ta: '01',
+  Ti: '01',
+  Tin: '01',
+  Tun: '01',
 };
 
-// Bayan (bass) parameters - derived from sample analysis
-// Ge: 120 Hz, 24ms attack, longer decay
-// Ke: 140 Hz, 10ms attack, dry muted sound
-const BAYAN_PARAMS: Record<string, BayanParams> = {
-  ghe: { frequency: 120, decay: 0.4, attack: 0.024, pitchDecay: 0.08, octaves: 2.5 },
-  ga: { frequency: 120, decay: 0.4, attack: 0.024, pitchDecay: 0.08, octaves: 2.5 },
-  ge: { frequency: 120, decay: 0.4, attack: 0.024, pitchDecay: 0.08, octaves: 2.5 },
-  ke: { frequency: 140, decay: 0.1, attack: 0.01, pitchDecay: 0.03, octaves: 1.5 },
-  kat: { frequency: 140, decay: 0.1, attack: 0.01, pitchDecay: 0.03, octaves: 1.5 },
-};
-
-// Combined bols (both drums)
-const COMBINED_BOLS: Record<string, { bass: string; treble: string }> = {
-  dha: { bass: 'ghe', treble: 'ta' },
-  dhin: { bass: 'ghe', treble: 'tin' },
-  dhit: { bass: 'ghe', treble: 'ti' },
-  tete: { bass: 'ke', treble: 'te' },
-  gadi: { bass: 'ge', treble: 'ti' },
-  trkt: { bass: 'ke', treble: 'ti' },
+// Map bol names to their canonical form
+const BOL_MAP: Record<string, string> = {
+  dha: 'Dha',
+  dhin: 'Dhin',
+  dhit: 'Dhit',
+  dhun: 'Dhun',
+  ga: 'Ga',
+  ghe: 'Ge',
+  ge: 'Ge',
+  ke: 'Ke',
+  kat: 'Ke',
+  ka: 'Ke',
+  na: 'Na',
+  ta: 'Ta',
+  ti: 'Ti',
+  te: 'Ti',
+  tin: 'Tin',
+  tun: 'Tun',
+  ra: 'Ta',
+  tete: 'Ti',
+  trkt: 'Ti',
 };
 
 class TablaPlayer {
-  private dayanSynth: Tone.MetalSynth | null = null;
-  private bayanSynth: Tone.MembraneSynth | null = null;
+  private players: Map<string, Tone.Player> = new Map();
   private isInitialized = false;
+  private isLoading = false;
+  private sampleConfig: Record<string, string> = DEFAULT_SAMPLES;
 
   async init(): Promise<void> {
-    if (this.isInitialized) return;
+    if (this.isInitialized || this.isLoading) return;
+
+    this.isLoading = true;
 
     await Tone.start();
 
-    // Dayan - metallic overtones for treble sounds
-    // Based on sample analysis: high fundamental (1315 Hz for Ta/Na), fast attack
-    this.dayanSynth = new Tone.MetalSynth({
-      envelope: {
-        attack: 0.001,
-        decay: 0.15,
-        release: 0.1,
-      },
-      harmonicity: 5.1,
-      modulationIndex: 12,
-      resonance: 3000,
-      octaves: 1.2,
-    }).toDestination();
+    // Load sample config from localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('tablaSamples');
+      if (saved) {
+        try {
+          this.sampleConfig = { ...DEFAULT_SAMPLES, ...JSON.parse(saved) };
+        } catch {
+          // ignore
+        }
+      }
+    }
 
-    // Bayan - membrane with pitch glissando
-    // Based on sample analysis: low fundamental (~120 Hz), slower attack (24ms)
-    this.bayanSynth = new Tone.MembraneSynth({
-      pitchDecay: 0.08,
-      octaves: 2.5,
-      oscillator: { type: 'sine' },
-      envelope: {
-        attack: 0.024,
-        decay: 0.4,
-        sustain: 0,
-        release: 0.8,
-      },
-    }).toDestination();
+    // Load all samples
+    const loadPromises: Promise<void>[] = [];
+
+    for (const [bolType, variation] of Object.entries(this.sampleConfig)) {
+      const url = `/samples/${bolType}${variation}.mp3`;
+      const player = new Tone.Player(url).toDestination();
+      this.players.set(bolType, player);
+      loadPromises.push(Tone.loaded());
+    }
+
+    await Promise.all(loadPromises);
 
     this.isInitialized = true;
+    this.isLoading = false;
   }
 
   get ready(): boolean {
     return this.isInitialized;
-  }
-
-  private playDayan(bol: string, time?: number): void {
-    if (!this.dayanSynth) return;
-    const params = DAYAN_PARAMS[bol.toLowerCase()];
-    if (!params) return;
-
-    this.dayanSynth.frequency.value = params.frequency;
-    this.dayanSynth.envelope.attack = params.attack;
-    this.dayanSynth.envelope.decay = params.decay;
-    this.dayanSynth.harmonicity = params.harmonicity;
-    this.dayanSynth.triggerAttackRelease('32n', time ?? Tone.now());
-  }
-
-  private playBayan(bol: string, time?: number): void {
-    if (!this.bayanSynth) return;
-    const params = BAYAN_PARAMS[bol.toLowerCase()];
-    if (!params) return;
-
-    this.bayanSynth.pitchDecay = params.pitchDecay;
-    this.bayanSynth.octaves = params.octaves;
-    this.bayanSynth.envelope.attack = params.attack;
-    this.bayanSynth.envelope.decay = params.decay;
-    this.bayanSynth.triggerAttackRelease(params.frequency, '8n', time ?? Tone.now());
   }
 
   playBol(bol: string, time?: number): void {
@@ -127,31 +92,26 @@ class TablaPlayer {
     const bolLower = bol.toLowerCase();
     if (bolLower === '-') return;
 
-    // Check if combined bol
-    const combo = COMBINED_BOLS[bolLower];
-    if (combo) {
-      this.playBayan(combo.bass, time);
-      this.playDayan(combo.treble, time);
-      return;
-    }
+    // Get canonical bol name
+    const bolType = BOL_MAP[bolLower];
+    if (!bolType) return;
 
-    // Check treble
-    if (DAYAN_PARAMS[bolLower]) {
-      this.playDayan(bolLower, time);
-      return;
-    }
+    const player = this.players.get(bolType);
+    if (player && player.loaded) {
+      // Create a new player instance for overlapping sounds
+      const tempPlayer = new Tone.Player(player.buffer).toDestination();
+      tempPlayer.start(time ?? Tone.now());
 
-    // Check bass
-    if (BAYAN_PARAMS[bolLower]) {
-      this.playBayan(bolLower, time);
+      // Cleanup after playback
+      setTimeout(() => {
+        tempPlayer.dispose();
+      }, 3000);
     }
   }
 
   dispose(): void {
-    this.dayanSynth?.dispose();
-    this.bayanSynth?.dispose();
-    this.dayanSynth = null;
-    this.bayanSynth = null;
+    this.players.forEach((player) => player.dispose());
+    this.players.clear();
     this.isInitialized = false;
   }
 }
@@ -164,6 +124,14 @@ export function getTablaPlayer(): TablaPlayer {
     instance = new TablaPlayer();
   }
   return instance;
+}
+
+// Force reload samples (after changing selection in lab)
+export function reloadTablaPlayer(): void {
+  if (instance) {
+    instance.dispose();
+    instance = null;
+  }
 }
 
 // iOS Safari audio unlock

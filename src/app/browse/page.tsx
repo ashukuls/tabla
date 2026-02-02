@@ -4,15 +4,16 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getCompositions } from '@/lib/firebase/db';
 import { parseComposition } from '@/lib/parser';
-import { TAALS } from '@/lib/types';
+import { TAALS, CATEGORIES } from '@/lib/types';
 import BolGrid from '@/components/BolGrid';
-import type { Composition } from '@/lib/types';
+import type { Composition, CompositionCategory } from '@/lib/types';
 
 export default function BrowsePage() {
   const [compositions, setCompositions] = useState<Composition[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [taalFilter, setTaalFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<CompositionCategory | ''>('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title'>('newest');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -34,7 +35,8 @@ export default function BrowsePage() {
           tag.toLowerCase().includes(search.toLowerCase())
         );
       const matchesTaal = !taalFilter || comp.taal === taalFilter;
-      return matchesSearch && matchesTaal;
+      const matchesCategory = !categoryFilter || comp.category === categoryFilter;
+      return matchesSearch && matchesTaal && matchesCategory;
     })
     .sort((a, b) => {
       if (sortBy === 'title') {
@@ -71,15 +73,29 @@ export default function BrowsePage() {
 
         {/* Filters */}
         <div className="bg-white rounded-2xl shadow-lg border-2 border-amber-200 p-4 mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {/* Search */}
             <input
               type="text"
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="p-3 bg-amber-50 border-2 border-amber-200 rounded-xl text-amber-900 focus:border-amber-400 focus:outline-none"
+              className="col-span-2 sm:col-span-1 p-3 bg-amber-50 border-2 border-amber-200 rounded-xl text-amber-900 focus:border-amber-400 focus:outline-none"
             />
+
+            {/* Category Filter */}
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value as CompositionCategory | '')}
+              className="p-3 bg-amber-50 border-2 border-amber-200 rounded-xl text-amber-900 focus:border-amber-400 focus:outline-none"
+            >
+              <option value="">All Types</option>
+              {CATEGORIES.map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
 
             {/* Taal Filter */}
             <select
@@ -101,9 +117,9 @@ export default function BrowsePage() {
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
               className="p-3 bg-amber-50 border-2 border-amber-200 rounded-xl text-amber-900 focus:border-amber-400 focus:outline-none"
             >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="title">By Title</option>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="title">Title</option>
             </select>
           </div>
         </div>
@@ -142,6 +158,11 @@ export default function BrowsePage() {
                           </h2>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2 ml-6">
+                          {comp.category && (
+                            <span className="px-2 py-1 bg-amber-500 text-white rounded text-sm capitalize">
+                              {comp.category}
+                            </span>
+                          )}
                           <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-sm">
                             {comp.taal}
                           </span>

@@ -12,6 +12,8 @@ import {
   getComposition,
   updateComposition,
 } from '@/lib/firebase/db';
+import { CATEGORIES } from '@/lib/types';
+import type { CompositionCategory } from '@/lib/types';
 
 function UploadContent() {
   const router = useRouter();
@@ -21,6 +23,7 @@ function UploadContent() {
   const [title, setTitle] = useState('');
   const [taal, setTaal] = useState('Teentaal');
   const [tempo, setTempo] = useState(60);
+  const [category, setCategory] = useState<CompositionCategory>('theka');
   const [bols, setBols] = useState('');
   const [author, setAuthor] = useState('');
   const [description, setDescription] = useState('');
@@ -42,6 +45,7 @@ function UploadContent() {
             setTitle(comp.title || '');
             setTaal(comp.taal || 'Teentaal');
             setTempo(comp.tempo || 60);
+            setCategory(comp.category || 'theka');
             setBols(comp.bols || '');
             setAuthor(comp.author || '');
             setDescription(comp.description || '');
@@ -83,6 +87,7 @@ function UploadContent() {
         title: title.trim(),
         taal,
         tempo,
+        category,
         bols: bols.trim(),
         author: author.trim() || undefined,
         description: description.trim() || undefined,
@@ -146,8 +151,24 @@ function UploadContent() {
             />
           </div>
 
-          {/* Taal & Tempo */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Category, Taal & Tempo */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-amber-700 font-medium mb-2">
+                Type
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value as CompositionCategory)}
+                className="w-full p-3 bg-white border-2 border-amber-200 rounded-xl text-amber-900 focus:border-amber-400 focus:outline-none"
+              >
+                {CATEGORIES.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <TaalSelector value={taal} onChange={setTaal} />
             <div className="flex items-end">
               <TempoInput tempo={tempo} onChange={setTempo} />
