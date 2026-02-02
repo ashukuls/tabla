@@ -20,22 +20,22 @@
 	}
 </script>
 
-<div class="bol-grid space-y-4">
+<div class="bol-grid space-y-1">
 	{#each rows as row, rowIdx}
 		<div
-			class="row flex flex-wrap gap-2 p-3 rounded-xl transition-colors duration-150"
+			class="row flex flex-wrap gap-1 p-2 rounded-lg transition-colors duration-150"
 			class:bg-amber-100={currentRow === rowIdx}
 			class:bg-white={currentRow !== rowIdx}
 		>
 			{#each groupBeats(row.beats, beatsPerRow) as group, groupIdx}
-				<div class="vibhag flex gap-1 px-2 py-1 border-l-2 border-amber-300 first:border-l-0">
+				<div class="vibhag flex gap-0.5 px-1.5 py-0.5 border-l-2 border-amber-300 first:border-l-0">
 					{#each group as beat, beatIdx}
 						{@const globalBeatIdx = groupIdx * beatsPerRow + beatIdx}
 						<div
-							class="beat flex items-center justify-center min-w-[3rem] px-2 py-2 rounded-lg font-mono text-lg transition-all duration-100"
+							class="beat flex items-center justify-center min-w-[2rem] px-1 py-1 rounded font-mono text-sm transition-all duration-100"
 							class:bg-amber-500={currentRow === rowIdx && currentBeat === globalBeatIdx}
 							class:text-white={currentRow === rowIdx && currentBeat === globalBeatIdx}
-							class:scale-110={currentRow === rowIdx && currentBeat === globalBeatIdx}
+							class:scale-105={currentRow === rowIdx && currentBeat === globalBeatIdx}
 							class:bg-amber-50={!(currentRow === rowIdx && currentBeat === globalBeatIdx)}
 							class:text-amber-900={!(currentRow === rowIdx && currentBeat === globalBeatIdx)}
 						>
