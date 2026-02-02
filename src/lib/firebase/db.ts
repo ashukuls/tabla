@@ -1,8 +1,9 @@
 import { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, type QueryConstraint } from 'firebase/firestore';
 import { getDb } from './config';
-import type { Composition } from '$lib/types';
+import type { Composition, PolyrhythmPreset } from '$lib/types';
 
 const COMPOSITIONS_COLLECTION = 'compositions';
+const POLYRHYTHM_PRESETS_COLLECTION = 'polyrhythmPresets';
 
 export async function getCompositions(constraints: QueryConstraint[] = []): Promise<Composition[]> {
 	const db = getDb();
@@ -44,6 +45,33 @@ export async function updateComposition(id: string, data: Partial<Composition>):
 export async function deleteComposition(id: string): Promise<void> {
 	const db = getDb();
 	const docRef = doc(db, COMPOSITIONS_COLLECTION, id);
+	await deleteDoc(docRef);
+}
+
+// Polyrhythm Preset functions
+export async function getPolyrhythmPresets(): Promise<PolyrhythmPreset[]> {
+	const db = getDb();
+	const q = query(collection(db, POLYRHYTHM_PRESETS_COLLECTION), orderBy('name'));
+	const snapshot = await getDocs(q);
+	return snapshot.docs.map((doc) => ({
+		id: doc.id,
+		...doc.data()
+	})) as PolyrhythmPreset[];
+}
+
+export async function createPolyrhythmPreset(data: Omit<PolyrhythmPreset, 'id'>): Promise<string> {
+	const db = getDb();
+	const docRef = await addDoc(collection(db, POLYRHYTHM_PRESETS_COLLECTION), {
+		...data,
+		createdAt: new Date().toISOString(),
+		updatedAt: new Date().toISOString()
+	});
+	return docRef.id;
+}
+
+export async function deletePolyrhythmPreset(id: string): Promise<void> {
+	const db = getDb();
+	const docRef = doc(db, POLYRHYTHM_PRESETS_COLLECTION, id);
 	await deleteDoc(docRef);
 }
 

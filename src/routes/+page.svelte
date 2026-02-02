@@ -19,24 +19,35 @@
 
 		<div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
 			<a
+				href="/browse"
+				class="block p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow border-2 border-amber-200 hover:border-amber-400"
+			>
+				<h2 class="text-2xl font-semibold text-amber-800 mb-3">Browse Compositions</h2>
+				<p class="text-amber-600">
+					Explore tabla compositions shared by the community. Search by taal, filter by tags, and
+					play compositions with synchronized audio.
+				</p>
+			</a>
+
+			<a
 				href="/player"
 				class="block p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow border-2 border-amber-200 hover:border-amber-400"
 			>
 				<h2 class="text-2xl font-semibold text-amber-800 mb-3">Tabla Player</h2>
 				<p class="text-amber-600">
-					Browse and play tabla compositions. Learn thekas, kaydas, and more with synchronized audio
-					and visual feedback.
+					Create and play your own compositions. Learn thekas, kaydas, and more with synchronized
+					audio and visual feedback.
 				</p>
 			</a>
 
 			<a
-				href="/polyrhythm"
+				href="/trainer"
 				class="block p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow border-2 border-amber-200 hover:border-amber-400"
 			>
-				<h2 class="text-2xl font-semibold text-amber-800 mb-3">Polyrhythm Trainer</h2>
+				<h2 class="text-2xl font-semibold text-amber-800 mb-3">Layakari Polyrhythm Trainer</h2>
 				<p class="text-amber-600">
 					Practice complex polyrhythms. Define N bols over D beats and train with audio-visual
-					synchronization.
+					synchronization. Perfect for layakari practice.
 				</p>
 			</a>
 
@@ -59,6 +70,17 @@
 				<p class="text-amber-600">
 					Contribute your own tabla compositions. Share thekas, kaydas, and practice pieces with the
 					community.
+				</p>
+			</a>
+
+			<a
+				href="/lab"
+				class="block p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow border-2 border-gray-200 hover:border-gray-400"
+			>
+				<h2 class="text-2xl font-semibold text-gray-700 mb-3">Sound Lab</h2>
+				<p class="text-gray-500">
+					Experiment with tabla synthesis parameters. Tune dayan and bayan sounds using Tone.js
+					MetalSynth and MembraneSynth.
 				</p>
 			</a>
 		</div>

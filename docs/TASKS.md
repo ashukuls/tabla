@@ -24,30 +24,30 @@
 - [ ] Test latency and mobile compatibility
 
 ### Phase 3: Tabla Player App
-- [ ] Create `/player` route
-- [ ] Design UI for bol input/display
-- [ ] Implement bol parsing (text → array)
-- [ ] Create `BolGrid.svelte` component
-- [ ] Create `PlaybackControls.svelte` component
-- [ ] Connect to Tone.js sampler
-- [ ] Add tempo slider
-- [ ] Implement kaida save to Firestore
-- [ ] Implement kaida load from Firestore
+- [x] Create `/player` route
+- [x] Design UI for bol input/display
+- [x] Implement bol parsing (text → array)
+- [x] Create `BolGrid.svelte` component
+- [x] Create `PlaybackControls.svelte` component
+- [x] Connect to Tone.js sampler
+- [x] Add tempo slider
+- [x] Implement kaida save to Firestore
+- [x] Implement kaida load from Firestore
 
 ### Phase 4: Polyrhythm Trainer Migration
-- [ ] Create `/trainer` route
-- [ ] Port existing polyrhythm logic to TypeScript
-- [ ] Replace Web Audio API with Tone.js
-- [ ] Create Svelte components for grid/controls
-- [ ] Connect presets to Firestore
-- [ ] Maintain feature parity with current app
+- [x] Create `/trainer` route
+- [x] Port existing polyrhythm logic to TypeScript
+- [x] Replace Web Audio API with Tone.js
+- [x] Create Svelte components for grid/controls
+- [x] Connect presets to Firestore
+- [x] Maintain feature parity with current app
 - [ ] Test mobile/desktop grid layouts
 
 ### Phase 5: User Features
-- [ ] Kaida upload form with validation
-- [ ] Browse public kaidas page
-- [ ] Search/filter by taal
-- [ ] Taal selector component
+- [x] Kaida upload form with validation
+- [x] Browse public kaidas page
+- [x] Search/filter by taal
+- [x] Taal selector component
 - [ ] (Optional) Firebase Auth integration
 - [ ] (Optional) Personal saved kaidas
 

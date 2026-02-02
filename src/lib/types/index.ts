@@ -72,3 +72,29 @@ export interface Preset {
 	subdivisions: number;
 	laghuEnabled: boolean;
 }
+
+// Polyrhythm preset configuration
+export interface PolyrhythmPreset {
+	id: string;
+	name: string;
+	bols: number; // N - number of bol accents
+	beats: number; // D - number of beats
+	tempo: number; // BPM
+	volumes: {
+		beat: number; // 0-100
+		bol: number;
+		subdivision: number;
+	};
+	createdAt?: string;
+	updatedAt?: string;
+}
+
+// Polyrhythm pattern calculation result
+export interface PolyrhythmPattern {
+	totalBlocks: number;
+	bolInterval: number;
+	beatInterval: number;
+	bolBlocks: number[]; // Indices where bols occur
+	beatBlocks: number[]; // Indices where beats occur
+	boxNumbers: number[]; // Display number for each block
+}
